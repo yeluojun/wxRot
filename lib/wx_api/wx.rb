@@ -1,5 +1,7 @@
 require 'rest-client'
 require 'json'
+require 'active_support/all'
+# require 'ha'
 module WxApi
   class Wx
 
@@ -31,19 +33,35 @@ module WxApi
         if data.include? 'window.code=200'
           puts 'login success' # login success
           redis_url = data.split(/\"/)[1]
-          @tickets =   get_url_params redis_url
+          @tickets = get_url_params redis_url
+          break
         else
           puts 'login failed', data # login failed
         end
-        @tickets
       end
+      p @tickets
+      @tickets
     end
 
     # 获取各种身份验证信息
     def get_tickets(uuid, ticket, scan)
-      url= "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=#{ticket}&uuid=#{uuid}&lang=en_US&scan=#{scan}&fun=new&version=v2&lang=en_US"
+      url= "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=#{ticket}&uuid=#{uuid}&lang=zh_CN&scan=#{scan}&fun=new&version=v2&lang=zh_CN"
+      data = RestClient::Request.execute(method: :get, url: url)
+      data = Hash.from_xml(data)
+      # {"error"=>{"ret"=>"0", "message"=>"OK", "skey"=>"@crypt_9b7299e2_793a0a9fd7afaade20eaea9937e0a717",
+      #            "wxsid"=>"H0/ch7t+S6a2LVsH", "wxuin"=>"608120400",
+      #            "pass_ticket"=>"6Bk%2BWmSIOkEoiba6bUS%2BG6ijPwOkeDmVatpkqNmknrY%2BusWbGLnu9NFEKvXEF1tk",
+      #            "isgrayscale"=>"1"}}
+
+      data['error']
     end
 
+    # 微信初始化
+    def wx_init(pass_ticket)
+      url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r=-#{Time.now.to_i}&lang=zh_CN&pass_ticket=#{pass_ticket}"
+      data = RestClient::Request.execute(method: :get, url: url)
+      JSON.parse data
+    end
 
     private
 
@@ -57,5 +75,7 @@ module WxApi
       end
      params
     end
+
+
   end
 end

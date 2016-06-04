@@ -4,7 +4,7 @@ require_relative 'wx'
 class WxTest < MiniTest::Unit::TestCase
   def setup
     @wx_api = WxApi::Wx.new
-    # @uuid = @wx_api.get_uuid
+    @uuid = @wx_api.get_uuid
   end
 
   def test_get_uuid
@@ -24,7 +24,10 @@ class WxTest < MiniTest::Unit::TestCase
   end
 
   def test_get_tickets
-    data = @wx_api.get_tickets
+     @wx_api.get_qr @uuid
+     data =  @wx_api.login_wx @uuid, 0
+     data = @wx_api.get_tickets(@uuid, data['ticket'], data['scan'])
+     @wx_api.wx_init data['pass_ticket']
   end
 
   def test_get_url_params
