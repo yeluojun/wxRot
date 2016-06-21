@@ -61,7 +61,7 @@ module WxApi
     end
 
     # 微信初始化
-    def wx_init(pass_ticket, permit_params, cookies)
+    def wx_init(pass_ticket, permit_params)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r=-#{Time.now.to_i}&lang=zh_CN&pass_ticket=#{pass_ticket}"
       p url
 

@@ -13,12 +13,16 @@ class Api::V1::LoginController < ApplicationController
 
   def login
     t = Thread.new do
+      p 'time start: ', Time.now.to_i
       @code, @data = @wx.login_wx(params[:uuid])
+      p 'time end: ', Time.now.to_i
     end
     t.join
-    if t.blank?
-      render json: { code: @code, data: @data}
-    end
+    render json: { code: @code, data: @data}
+  end
+
+  def wx_init
+
   end
 
   def set_wx
