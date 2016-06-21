@@ -3,7 +3,6 @@ window.onload =function(){
   console.log('load success');
   $('.login').on('click', function(){
       $.ajax({
-
             url: '/login',
             data: '',
             data_type: 'json',
@@ -28,18 +27,16 @@ window.onload =function(){
       };
 
       $.ajax({
-          url: '/ap1/v1/uuid',
+          url: '/api/v1/uuid',
           data: '',
           data_type: 'json',
           success: function(data){
               if (data.code === 200){
                   get_qr(data.data)
               }
-
-
           },
           error: function(){
-              alert('login failed')
+              alert('get uuid failed')
           }
       })
   }()

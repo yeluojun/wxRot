@@ -12,7 +12,7 @@ module WxApi
           method: :get,
           url: url,
           cookies: {pgv_pvi: '1552874496', pgv_pvid: '3477447358', pgv_si: 's7350482944'})
-      @file = File.new("#{Rails.root}/#{uuid}.png", 'wb')
+      @file = File.new("#{Rails.root}/public/#{uuid}.png", 'wb')
       @file << data
       @file.close
       true

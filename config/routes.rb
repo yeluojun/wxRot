@@ -4,8 +4,12 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get 'uuid', to: 'login#get_uuid'
-      get 'qt', to: 'login#get_qr'
+      get 'qr', to: 'login#get_qr'
       get 'login', to: 'login#login'
     end
+  end
+
+  namespace :admin do
+
   end
 end
