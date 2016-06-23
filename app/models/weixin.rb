@@ -1,0 +1,2 @@
+class Weixin < ApplicationRecord
+end

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
       get 'uuid', to: 'login#get_uuid'
       get 'qr', to: 'login#get_qr'
       get 'login', to: 'login#login'
+      get 'tickets', to: 'login#get_tickets'
     end
   end
 

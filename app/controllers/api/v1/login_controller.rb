@@ -3,12 +3,19 @@ class Api::V1::LoginController < ApplicationController
   def get_uuid
     render json: { code: 200, data: @wx.get_uuid}
   end
+
   def get_qr
     t = Thread.new do
       @tr = @wx.get_qr(params[:uuid])
     end
     t.join
     render json: { code: 200, data: @tr }
+  end
+
+  def get_tickets
+    @data = @wx.get_tickets(params[:uuid], params[:ticket], params[:scan])
+    render json: { code: 200, data: @data}
+
   end
 
   def login

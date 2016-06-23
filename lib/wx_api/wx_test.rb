@@ -27,15 +27,15 @@ class WxTest < MiniTest::Unit::TestCase
      @wx_api.get_qr @uuid
      data =  @wx_api.login_wx @uuid, 0
      data, cookies = @wx_api.get_tickets(@uuid, data['ticket'], data['scan'])
-     @wx_api.wx_init data['pass_ticket'], { Uin: data['wxuin'], Sid: data['wxsid'], Skey: data['skey'], DeviceID: 'e15920363777' }, cookies
+     @wx_api.wx_init data['pass_ticket'], { Uin: data['wxuin'], Sid: data['wxsid'], Skey: data['skey'], DeviceID: 'e15920363777' }
   end
 
   # 测试回去微信消息的id
   def test_get_wx_message_id
     @wx_api.get_qr @uuid
     data =  @wx_api.login_wx @uuid, 0
-    data, cookies = @wx_api.get_tickets(@uuid, data['ticket'], Time.now.to_i)
-    p @wx_api.wx_init data['pass_ticket'], { Uin: data['wxuin'], Sid: data['wxsid'], Skey: data['skey'], DeviceID: 'e1615250492' },cookies
+    data = @wx_api.get_tickets(@uuid, data['ticket'], Time.now.to_i)
+    p @wx_api.wx_init data['pass_ticket'],{BaseRequest: { Uin: data['wxuin'], Sid: data['wxsid'], Skey: data['skey'], DeviceID: 'e846610781548096' }}
     # p @wx_api.get_wx_message_id(data['pass_ticket'])
   end
 
