@@ -20,6 +20,12 @@ class Api::V1::WeixinsController < Api::V1::BasesController
     render json: { code: 200, data: @data}
   end
 
+  # 获取微信message id
+  def message_id
+    @data = @wx.get_wx_message_id params[:pass_ticket]
+    render json: { code: 200, data: @data }
+  end
+
   # 微信初始化
   def weixinInit
     @data = @wx.wx_init(params[:pass_ticket], params[:base])
