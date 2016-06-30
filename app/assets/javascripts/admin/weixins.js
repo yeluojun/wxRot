@@ -40,6 +40,8 @@ $(function(){
 
   // 添加微信机器人
   $('#add-wxbot').on('click', function () {
+    $('#qr').html('');
+    $('#qr-msg').html('');
     var success = function (data) {
       wxData.uuid = data.data;
       $('#qr').html("<img style='width: 150px; height: 150px' src='/qrs/"+ data.data+ ".png'>")
