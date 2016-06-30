@@ -1,19 +1,38 @@
 
 window.onload =function(){
-    $("#user-login").on('click', function () {
-        $.ajax({
-            type: 'POST',
-            url: '/session',
-            data: '',
-            data_type: 'json',
-            success: function (data) {
+  $("#user-login").on('click', function () {
 
-            },
-            error: function () {
-                alert('login failed')
-            }
-        })
+    if($('.login_div').find("input[name='name']").val()  == null || $('.login_div').find("input[name='name']").val()  == '' ){
+      ye.alert('请输入用户名');
+      return
+    }
+    if($('.login_div').find("input[name='name']").val()  == null || $('.login_div').find("input[name='password']").val()  == '' ){
+      ye.alert('请输入密码');
+      return
+    }
+    $(this).addClass('disabled');
+    var success = function (data) {
+      if (data.code === 200){
+
+      }else{
+        ye.alert(data.msg)
+      }
+      $(this).removeClass('disabled');
+    };
+    var error = function (err) {
+      $(this).removeClass('disabled');
+      ye.alert('网络或服务器异常，请稍后重试');
+    };
+
+    $.ajax({
+      type: 'POST',
+      url: '/sessions',
+      data: {name: $('.login_div').find("input[name='name']").val(), password: $('.login_div').find("input[name='password']").val()},
+      data_type: 'json',
+      success: success.bind(this),
+      error: error.bind(this)
     })
+  })
 };
 // window.onload =function(){
 //   console.log('load success');
@@ -106,7 +125,7 @@ window.onload =function(){
 //       })
 //   }()
 // };
-//
-// //$('.login').on('click', function(){
-// //    console.log('login')
-// //})
+
+//$('.login').on('click', function(){
+//    console.log('login')
+//})

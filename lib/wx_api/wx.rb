@@ -12,8 +12,8 @@ module WxApi
           method: :get,
           url: url,
           cookies: {pgv_pvi: '1552874496', pgv_pvid: '3477447358', pgv_si: 's7350482944'})
-      # @file = File.new("#{Rails.root}/public/#{uuid}.png", 'wb')
-      @file = File.new("aaa.png", 'wb')
+      @file = File.new("#{Rails.root}/public/qrs/#{uuid}.png", 'wb')
+      # @file = File.new("aaa.png", 'wb')
       @file << data
       @file.close
       true
@@ -28,23 +28,22 @@ module WxApi
 
     # 登陆微信
     def login_wx(uuid, tip = 0)
-      loop do
+      # loop do
         url = "https://login.wx.qq.com/cgi-bin/mmwebwx-bin/login?loginicon=true&uuid=#{uuid}&tip=#{tip}&_=#{Time.now.to_i}&r=-#{Time.now.to_i}"
         data = RestClient::Request.execute(method: :get, url: url)
         if data.include? 'window.code=200'
           puts 'login success' # login success
           redis_url = data.split(/\"/)[1]
           @tickets = get_url_params redis_url
-          break
-          # [200, @tickets]
+          # break
+          [200, @tickets]
         elsif data.include? 'window.code=400'
           puts 'login failed', data # login failed
-          # return [400, @tickets]
+          return [400, @tickets]
         else
-          # return [408, @tickets]
+          return [408, @tickets]
         end
-      end
-
+      # end
       @tickets
     end
 
