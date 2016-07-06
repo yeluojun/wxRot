@@ -22,14 +22,25 @@ class Api::V1::WeixinsController < Api::V1::BasesController
 
   # 获取微信message id
   def message_id
-    @data = @wx.get_wx_message_id params[:pass_ticket]
+    @data = @wx.get_wx_message_id params[:ticket]
     render json: { code: 200, data: @data }
   end
 
   # 微信初始化
   def weixinInit
     @data = @wx.wx_init(params[:pass_ticket], params[:base])
-    render json: { code: 200, data: @data}
+    wx = params[:weixin]
+    wx[:UserName] = @data['User']['UserName']
+    data_exist = WeixinTicket.where(wx_uid: wx[:wxuin]).first
+    if data_exist.blank?
+      WeixinTicket.create!(wx_uid: wx[:wx_uid], json_data: wx.to_json)
+    else
+      data_exist.update!(json_data: wx.to_json)
+    end
+
+    # 开启微信心跳的任务
+
+    render json: { code: 200, data: @data }
   end
 
   # save_wx_ticket: 保存微信各种ticket数据到数据库

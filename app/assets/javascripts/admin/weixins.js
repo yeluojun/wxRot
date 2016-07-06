@@ -1,6 +1,6 @@
 $(function(){
 
-  wxData = {};
+  wxData = { prelogin: false };
 
   if (!document.getElementById('wx-robot-manager')) {
     return;
@@ -8,6 +8,9 @@ $(function(){
 
   // 微信登陆
   var login = function(data){
+    if (!wxData.prelogin){
+      return false;
+    }
     $.ajax({url: '/api/v1/weixins/login', data: {uuid: data}, data_type: 'json', success:
       function(ret){
         if(ret.code !== 200){
@@ -16,7 +19,8 @@ $(function(){
           wxData.ticket = ret.data.ticket;
           wxData.scan = ret.data.scan;
           wxData.lang = ret.data.lang;
-          get_tickets(wxData)
+          get_tickets(wxData);
+
         }
       },error: function(){
 
@@ -32,7 +36,18 @@ $(function(){
         wxData.wxuin = data.data.wxuin;
         wxData.pass_ticket = data.data.pass_ticket;
         wxData.isgrayscale = data.data.isgrayscale;
-        wxInit(wxData);
+        weixinInit(wxData);
+      },error: function(){
+      alert('获取票据失败');
+    } })
+  };
+
+  // 微信初始化
+  var weixinInit = function (wxData) {
+    // 来个随机数
+    var DeviceID = "e" + parseInt((Math.random()*9+1)*100000000000000);
+    $.ajax({type: 'POST', url: '/api/v1/weixins/init', data: {pass_ticket: wxData.pass_ticket, base:{BaseRequest:{ Uin: wxData.wxuin, Sid: wxData.wxsid, Skey: wxData.skey, DeviceID: DeviceID }}, weixin: wxData }, data_type: 'json', success:
+      function(data){
       },error: function(){
       alert('获取票据失败');
     } })
@@ -44,7 +59,9 @@ $(function(){
     $('#qr-msg').html('');
     var success = function (data) {
       wxData.uuid = data.data;
-      $('#qr').html("<img style='width: 150px; height: 150px' src='/qrs/"+ data.data+ ".png'>")
+      $('#qr').html("<img style='width: 150px; height: 150px' src='/qrs/"+ data.data+ ".png'>");
+      wxData.prelogin = true;
+      login(wxData.uuid)
     };
     var error = function (data) {
       $('#qr-msg').html("<p class='alert-danger' style='text-align: center'>获取二维码失败</p>")
@@ -56,6 +73,11 @@ $(function(){
       success: success.bind(this),
       error: error.bind(this)
     })
+  });
+
+  // 取消添加机器人,取消准备登陆的状态
+  $('#btn-cancel').on('click', function () {
+    wxData.prelogin = false;
   })
 
 });

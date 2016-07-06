@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160623085831) do
+ActiveRecord::Schema.define(version: 20160630080207) do
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "name"
@@ -20,12 +20,20 @@ ActiveRecord::Schema.define(version: 20160623085831) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "weixin_tickets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "wx_uid"
+    t.text     "json_data",  limit: 65535
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+  end
+
   create_table "weixins", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "name"
     t.string   "encry_name"
     t.string   "wx_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer  "status",     default: 0
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
 end

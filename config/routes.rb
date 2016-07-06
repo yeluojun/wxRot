@@ -8,10 +8,13 @@ Rails.application.routes.draw do
       get 'weixins/qr', to: 'weixins#qr'
       get 'weixins/login', to: 'weixins#login'
       get 'weixins/tickets', to: 'weixins#get_tickets'
-      get 'uuid', to: 'login#get_uuid'
-      get 'qr', to: 'login#get_qr'
-      get 'login', to: 'login#login'
-      get 'tickets', to: 'login#get_tickets'
+      # get 'uuid', to: 'login#get_uuid'
+      # get 'qr', to: 'login#get_qr'
+      # get 'login', to: 'login#login'
+      # get 'tickets', to: 'login#get_tickets'
+      get 'weixins/message_id', to: 'weixins#message_id'
+      post 'weixins/init', to: 'weixins#weixinInit'
+      post 'weixins/save', to: 'weixins#save_weixin'
     end
   end
 

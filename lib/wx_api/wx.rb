@@ -36,7 +36,7 @@ module WxApi
           redis_url = data.split(/\"/)[1]
           @tickets = get_url_params redis_url
           # break
-          [200, @tickets]
+          return [200, @tickets]
         elsif data.include? 'window.code=400'
           puts 'login failed', data # login failed
           return [400, @tickets]
@@ -44,7 +44,6 @@ module WxApi
           return [408, @tickets]
         end
       # end
-      @tickets
     end
 
     # 获取各种身份验证信息
