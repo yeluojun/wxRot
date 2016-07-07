@@ -1,0 +1,21 @@
+{
+  "name": "orange",
+  "version": "1.0.0",
+  "description": "orange & liveneeq",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.liveneeq.com:yeluojun/orgcloud.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^3.3.6",
+    "datatables.net": "^1.10.11",
+    "datatables.net-bs": "^1.10.11",
+    "jquery": "^2.2.3"
+  }
+}

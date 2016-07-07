@@ -3,6 +3,7 @@ class Api::V1::LoginController < ApplicationController
   def get_uuid
     render json: { code: 200, data: @wx.get_uuid}
   end
+
   def get_qr
     t = Thread.new do
       @tr = @wx.get_qr(params[:uuid])
@@ -11,14 +12,24 @@ class Api::V1::LoginController < ApplicationController
     render json: { code: 200, data: @tr }
   end
 
+  def get_tickets
+    @data = @wx.get_tickets(params[:uuid], params[:ticket], params[:scan])
+    render json: { code: 200, data: @data}
+
+  end
+
   def login
     t = Thread.new do
+      p 'time start: ', Time.now.to_i
       @code, @data = @wx.login_wx(params[:uuid])
+      p 'time end: ', Time.now.to_i
     end
     t.join
-    if t.blank?
-      render json: { code: @code, data: @data}
-    end
+    render json: { code: @code, data: @data}
+  end
+
+  def wx_init
+
   end
 
   def set_wx

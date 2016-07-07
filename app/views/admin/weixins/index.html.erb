@@ -1,0 +1,40 @@
+<h4 id="wx-robot-manager">机器人管理</h4>
+<hr>
+<button id='add-wxbot' type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+添加
+</button>
+<div>
+  <table class="table table-bordered">
+    <thead>
+    <th> 名称 </th>
+    <th> 微信标识 </th>
+    <th> 运行状态 </th>
+    <th> 操作 </th>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" >
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">请扫描二维码</h4>
+      </div>
+      <div class="modal-body">
+        <div id="qr"  style="width: 150px; height: 150px;margin-left: auto;margin-right: auto; background-color: #dcdcdc">
+        </div>
+        <div id="qr-msg" >
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btn-cancel" class="btn btn-default" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
