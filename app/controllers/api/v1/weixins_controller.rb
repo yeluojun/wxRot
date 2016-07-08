@@ -32,28 +32,23 @@ class Api::V1::WeixinsController < Api::V1::BasesController
     wx = params[:weixin]
     wx[:UserName] = @data['User']['UserName']
     wx[:NickName] = @data['User']['NickName']
-    data_exist = WeixinTicket.where(wx_uid: wx[:wxuin]).first
+    data_exist = WeixinTicket.where(wxuin: wx[:wxuin]).first
     if data_exist.blank?
-      WeixinTicket.create!(wx_uid: wx[:wxuin], json_data: wx.to_json)
+      WeixinTicket.create!(wxuin: wx[:wxuin], json_data: wx.to_json)
     else
       data_exist.update!(json_data: wx.to_json)
     end
-    sys_string = ''
-    @data['SyncKey']['List'].each do |list|
-      sys_string += "#{list['Key']}_#{list['Val']}|"
-    end
-    sys_string = sys_string.chop
     Thread.new do
-      WxHeartJob.perform_now({synckey: sys_string, uin: wx[:wxuin], cookies: params[:cookies]})  # 开启微信心跳的任务
+      WxHeartJob.perform_now({synckey: @data['SyncKey'], uin: wx[:wxuin], cookies: params[:cookies]})  # 开启微信心跳的任务
     end
     render json: { code: 200, data: @data }
   end
 
   # save_wx_ticket: 保存微信各种ticket数据到数据库
   def save_weixin
-    data_exist = WeixinTicket.where(wx_uid: params[:wx][:wxuin]).first
+    data_exist = WeixinTicket.where(wxuin: params[:wx][:wxuin]).first
     if data_exist.blank?
-      WeixinTicket.create!(wx_uid: params[:wx][:wx_uid], json_data: params[:wx].to_json)
+      WeixinTicket.create!(wxuin: params[:wx][:wx_uid], json_data: params[:wx].to_json)
     else
       data_exist.update!(json_data: params[:wx].to_json)
     end

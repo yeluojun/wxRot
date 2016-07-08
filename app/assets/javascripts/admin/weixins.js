@@ -48,8 +48,11 @@ $(function(){
     var DeviceID = "e" + parseInt((Math.random()*9+1)*100000000000000);
     $.ajax({type: 'POST', url: '/api/v1/weixins/init', data: {pass_ticket: wxData.pass_ticket, base:{BaseRequest:{ Uin: wxData.wxuin, Sid: wxData.wxsid, Skey: wxData.skey, DeviceID: DeviceID }}, weixin: wxData, cookies: cookies }, data_type: 'json', success:
       function(data){
+        setTimeout(function(){
+          window.location.reload(); // 刷新
+        }, 2000)
       },error: function(){
-      alert('获取票据失败');
+      alert('启动机器人失败');
     } })
   };
 

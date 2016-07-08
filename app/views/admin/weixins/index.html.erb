@@ -12,7 +12,14 @@
     <th> 操作 </th>
     </thead>
     <tbody>
-
+    <% @rots.each do |rot|%>
+    <tr>
+      <td><%= rot[:data]['NickName']%></td>
+      <td><%= rot[:data]['wxuin']%></td>
+      <td> 运行中 </td>
+      <td> 停止 </td>
+    </tr>
+    <% end %>
     </tbody>
   </table>
 </div>

@@ -3,9 +3,18 @@ class WxHeartJob < ApplicationJob
 
   # 心跳包任务
   def perform(*args)
+    p 'ping ping'
+    @wx =  WxApi::Wx.new
     params = args.first
     uin, synckey, cookies  = params[:uin], params[:synckey], params[:cookies]
-    weixin = WeixinTicket.where(wx_uid: uin).order('id desc').first
+
+    syn_string = ''
+    synckey['List'].each do |list|
+      syn_string += "#{list['Key']}_#{list['Val']}|"
+    end
+    syn_string = syn_string.chop
+
+    weixin = WeixinTicket.where(wxuin: uin).order('id desc').first
     return if weixin.blank?
     begin
       wx_data = JSON.parse weixin.json_data
@@ -13,14 +22,27 @@ class WxHeartJob < ApplicationJob
       p 'db error is :', ex.message
       return
     end
+
     # 更新机器人状态
-    rob = Weixin.where(wx_id: uin).first
+    rob = Weixin.where(wxuin: uin).first
     if rob.blank?
-      Weixin.create!(wx_id: uin, status: 1, name: wx_data['NickName'], encry_name: wx_data['UserName']) # 创建一个正在运行的机器人
+      Weixin.create!(wxuin: uin, status: 1, name: wx_data['NickName'], encry_name: wx_data['UserName']) # 创建一个正在运行的机器人
     else
       rob.update(status: 1, name: wx_data['NickName'], encry_name: wx_data['UserName']) # 更新机器人状态
     end
 
+    # 保存
+    $redis.set("wxRot_list##{uin}", wx_data.to_json)
+    $redis.expire(uin, 300)
+
+    # 获取所有的联系人列表
+    Thread.new do
+      data = JSON.parse @wx.get_wx_contact_member_list wx_data['pass_ticket'], wx_data['skey'], cookies
+      p 'get members :', data
+
+    end
+
+    # 开启心跳之旅
     loop do
       params = {
         _: Time.now.to_i + 1000,
@@ -28,28 +50,31 @@ class WxHeartJob < ApplicationJob
         deviceid: "e#{rand(999999999999999)}",
         sid: wx_data['wxsid'],
         skey: wx_data['skey'],
-        synckey: synckey,
+        synckey: syn_string,
         uin: uin
       }
       wx_data['skey'] = URI::encode(wx_data['skey'])
       wx_data['skey'][0] = '%40'
-      url = 'https://webpush.wx.qq.com/cgi-bin/mmwebwx-bin/synccheck'
       begin
-        data = RestClient.get(url, params: params, cookies: cookies)
+        data = @wx.synccheck params, cookies
+        p 'data fort synccheck:', data
         if data.include? '1100' #失败 or 退出登陆了
-          rob.update!(status: 0)
-          # 更新机器人状态
+          rob.update!(status: 0) # 更新机器人状态
+          break
         elsif data.include? "selector:\"0\""
           # do nothing
         else
           # 获取更新
-          url = ""
+          base = { BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"}, SyncKey: synckey , rr: Time.now.to_i }
+          data = JSON.parse @wx.webwxsync wx_data, base, cookies
+          p 'data for webwxsync is: ', data
         end
       rescue => ex
         p 'some error:', ex.message
         rob.update!(status: 0)
         break
       end
+      $redis.expire("wxRot_list##{uin}", 300)
       sleep 2
     end
   end

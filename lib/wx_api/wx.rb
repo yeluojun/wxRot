@@ -73,9 +73,10 @@ module WxApi
     end
 
     # 获取联系人列表
-    def get_wx_contact_member_list(pass_ticket,skey)
+    def get_wx_contact_member_list(pass_ticket, skey, cookies)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetcontact?pass_ticket=#{pass_ticket}&r=#{Time.now.to_i}&seq=0&skey=#{skey}"
-      JSON.parse RestClient::Request.execute(method: :get, url: url)
+      RestClient.get url, cookies: cookies
+
     end
 
     # 获取群组列表
@@ -85,9 +86,17 @@ module WxApi
     end
 
     # 检查 (类似心跳)
-    def synccheck
-
+    def synccheck(params, cookies)
+      url = 'https://webpush.wx.qq.com/cgi-bin/mmwebwx-bin/synccheck'
+      RestClient.get(url, params: params, cookies: cookies)
     end
+
+    # 获取微信更新(各种更新.包括新消息等等)
+    def webwxsync(wx_data, params, cookies)
+      url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsync?sid=#{wx_data['wxsid']}&skey=#{wx_data['skey']}&lang=en_US&pass_ticket=#{wx_data[:pass_ticket]}"
+      RestClient.post(url, params.to_json, cookies: cookies)
+    end
+
 
     private
 

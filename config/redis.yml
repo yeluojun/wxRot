@@ -1,0 +1,17 @@
+default: &default
+  driver: hiredis
+  host: <%= ENV['REDIS_HOST'] || '127.0.0.1' %>
+  port: <%= ENV['REDIS_PORT'] || 6379 %>
+  namespace: wxRot
+
+development:
+  <<: *default
+  db: 1
+
+test:
+  <<: *default
+  db: 2
+
+production:
+  <<: *default
+  db: 3

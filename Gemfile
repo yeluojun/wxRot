@@ -31,6 +31,11 @@ gem 'jbuilder', '~> 2.0'
 # gem 'bcrypt', '~> 3.1.7'\
 gem 'sidekiq'
 
+# redis 相关
+gem 'redis', '~> 3.0'
+gem 'hiredis'
+gem 'redis-namespace'
+
 gem 'rack-mini-profiler', require: false
 
 # Use Capistrano for deployment
