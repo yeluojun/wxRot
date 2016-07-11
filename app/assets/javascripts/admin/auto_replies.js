@@ -4,6 +4,6 @@ $(function(){
   }
 
   $('#auto-reply-form').on('submit', function(){
-
+    formData = $(this).serialize();
   })
 });
