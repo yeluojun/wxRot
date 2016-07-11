@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       post 'weixins/init', to: 'weixins#weixinInit'
       post 'weixins/save', to: 'weixins#save_weixin'
       get 'friends/friends', to: 'friends#friends'
+      post 'auto_replies', to: 'auto_replies#create'
     end
   end
 

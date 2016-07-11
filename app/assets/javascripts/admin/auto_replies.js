@@ -4,6 +4,19 @@ $(function(){
   }
 
   $('#auto-reply-form').on('submit', function(){
-    formData = $(this).serialize();
+    var formData = $(this).serialize();
+    $.ajax({
+      type: 'post',
+      url: '/api/v1/auto_replies?wxuin='+ye.getURLParameter('wxuin'),
+      data: formData,
+      success: function(data){
+
+      },
+      error: function(data){
+
+      }
+    })
+
+
   })
 });

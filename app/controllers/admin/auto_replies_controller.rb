@@ -5,6 +5,8 @@ class Admin::AutoRepliesController < Admin::BasesController
    @auto_reply = AutoReply.new
   end
 
+
+
   def edit
     @auto_reply = AutoReply.find(params[:id])
   end

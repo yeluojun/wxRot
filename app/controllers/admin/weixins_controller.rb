@@ -20,14 +20,4 @@ class Admin::WeixinsController < Admin::BasesController
   def edit
     @rot = Weixin.find_by('wxuin', params[:wxuin])
   end
-
-  # 新建自动回复
-  def auto_reply_new
-
-  end
-
-  # 编辑自动回复
-  def auto_reply_edit
-
-  end
 end
