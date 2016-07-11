@@ -15,11 +15,14 @@ Rails.application.routes.draw do
       get 'weixins/message_id', to: 'weixins#message_id'
       post 'weixins/init', to: 'weixins#weixinInit'
       post 'weixins/save', to: 'weixins#save_weixin'
+      get 'friends/friends', to: 'friends#friends'
     end
   end
 
   namespace :admin do
     get '/', to: 'index#index'
     get 'weixins', to: 'weixins#index'
+    get 'weixins/edit', to: 'weixins#edit'
+    resources :auto_replies
   end
 end

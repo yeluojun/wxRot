@@ -1,3 +1,16 @@
-<h4 id="wx-robot-manager">机器人配置<small><%= @rot.name %></small></h4>
+<h4 id="wx-robot-manager-config">机器人配置<small>（<%= @rot.name %>）</small></h4>
 
 <hr>
+<h5>配置好友自动回复</h5>
+
+<a class="btn btn-success" href="/admin/auto_replies/new?wxuin=<%= @rot.wxuin %>">新增</a>
+<table class="table table-bordered">
+	<th>
+		<td>标记</td>
+	　<td>自动回复的内容</td>
+	　<td>对应的好友</td>
+	  <td>操作</td>
+	</th>
+
+</table>
+

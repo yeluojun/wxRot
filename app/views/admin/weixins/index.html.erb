@@ -14,10 +14,13 @@
     <tbody>
     <% @rots.each do |rot|%>
     <tr>
-      <td><%= rot[:data]['NickName']%></td>
-      <td><%= rot[:data]['wxuin']%></td>
+      <td><%= rot[:data]['NickName'] %></td>
+      <td><%= rot[:data]['wxuin'] %></td>
       <td> 运行中 </td>
-      <td> 停止 </td>
+      <td>
+        停止
+	      <a href="/admin/weixins/edit?wxuin=<%= rot[:data]['wxuin'] %>">破诶之</a>
+      </td>
     </tr>
     <% end %>
     </tbody>

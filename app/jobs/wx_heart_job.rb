@@ -35,11 +35,27 @@ class WxHeartJob < ApplicationJob
     $redis.set("wxRot_list##{uin}", wx_data.to_json)
     $redis.expire(uin, 300)
 
+    # 保存cookie
+      $redis.set("wxRot_cookies##{uin}", cookies)
+    $redis.expire(uin, 300)
+
     # 获取所有的联系人列表
     Thread.new do
       data = JSON.parse @wx.get_wx_contact_member_list wx_data['pass_ticket'], wx_data['skey'], cookies
-      p 'get members :', data
 
+      # 更新联系人列表
+      p data
+      data['MemberList'].each do |ret|
+        user = Friend.where(UserName: ret['UserName'], wxuin: uin).first
+        params = Friend.params ret
+        params[:wxuin] = uin
+        if user.blank?
+          user = Friend.new(params)
+          user.save
+        else
+          user.update(params)
+        end
+      end
     end
 
     # 开启心跳之旅
@@ -57,7 +73,6 @@ class WxHeartJob < ApplicationJob
       wx_data['skey'][0] = '%40'
       begin
         data = @wx.synccheck params, cookies
-        p 'data fort synccheck:', data
         if data.include? '1100' #失败 or 退出登陆了
           rob.update!(status: 0) # 更新机器人状态
           break
@@ -67,7 +82,6 @@ class WxHeartJob < ApplicationJob
           # 获取更新
           base = { BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"}, SyncKey: synckey , rr: Time.now.to_i }
           data = JSON.parse @wx.webwxsync wx_data, base, cookies
-          p 'data for webwxsync is: ', data
         end
       rescue => ex
         p 'some error:', ex.message
@@ -75,6 +89,7 @@ class WxHeartJob < ApplicationJob
         break
       end
       $redis.expire("wxRot_list##{uin}", 300)
+      $redis.expire("wxRot_cookies##{uin}", 300)
       sleep 2
     end
   end

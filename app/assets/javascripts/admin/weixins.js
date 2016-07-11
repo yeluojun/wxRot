@@ -1,10 +1,10 @@
 $(function(){
 
-  wxData = { prelogin: false };
-
   if (!document.getElementById('wx-robot-manager')) {
     return;
   }
+
+  wxData = { prelogin: false };
 
   // 微信登陆
   var login = function(data){

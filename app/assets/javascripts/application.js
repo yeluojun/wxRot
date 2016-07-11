@@ -13,5 +13,6 @@
 //= require jquery
 //= require jquery_ujs
 //= require bootstrap/dist/js/bootstrap
+//= require devbridge-autocomplete/dist/jquery.autocomplete
 //= require_tree .
 //= require_self

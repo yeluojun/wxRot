@@ -1,8 +1,7 @@
 {
-  "name": "orange",
+  "name": "wxRot",
   "version": "1.0.0",
-  "description": "orange & liveneeq",
-  "main": "index.js",
+  "description": "wxRot frontend pack",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,6 +15,7 @@
     "bootstrap": "^3.3.6",
     "datatables.net": "^1.10.11",
     "datatables.net-bs": "^1.10.11",
-    "jquery": "^2.2.3"
+    "jquery": "^2.2.3",
+    "devbridge-autocomplete": "^1.2.25"
   }
 }

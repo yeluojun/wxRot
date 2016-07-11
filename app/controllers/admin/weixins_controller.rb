@@ -13,9 +13,21 @@ class Admin::WeixinsController < Admin::BasesController
   # 配置机器人
   # 私聊的自动回复
   # 群聊的回复
+  # 创建群组
   # 自动拉群
-  #
+  # 私聊
+  # TODO 关于群组的一概不管先　
   def edit
-    # 私聊
+    @rot = Weixin.find_by('wxuin', params[:wxuin])
+  end
+
+  # 新建自动回复
+  def auto_reply_new
+
+  end
+
+  # 编辑自动回复
+  def auto_reply_edit
+
   end
 end
