@@ -26,5 +26,6 @@ Rails.application.routes.draw do
     get 'weixins', to: 'weixins#index'
     get 'weixins/edit', to: 'weixins#edit'
     resources :auto_replies
+    resources :auto_reply_globals
   end
 end

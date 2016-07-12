@@ -1,2 +1,3 @@
-class Admin::AutoReplyGlobalsController < ApplicationController
+class Admin::AutoReplyGlobalsController < Admin::BasesController
+
 end
