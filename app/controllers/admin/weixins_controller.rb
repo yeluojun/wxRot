@@ -18,6 +18,11 @@ class Admin::WeixinsController < Admin::BasesController
   # 私聊
   # TODO 关于群组的一概不管先　
   def edit
-    @rot = Weixin.find_by('wxuin', params[:wxuin])
+    @wxuin = params[:wxuin]
+    @rot = Weixin.find_by('wxuin', @wxuin)
+    @auto_replies = AutoReply.includes(:friend).where(wxuin: @wxuin)
+    @auto_replies.each do |reply|
+      reply.user_str = reply.friend.NickName
+    end
   end
 end

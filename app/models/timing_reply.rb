@@ -1,0 +1,2 @@
+class TimingReply < ApplicationRecord
+end

@@ -1,4 +1,5 @@
 class Friend < ApplicationRecord
+  has_many :auto_replies
   class << self
     def params(data)
 

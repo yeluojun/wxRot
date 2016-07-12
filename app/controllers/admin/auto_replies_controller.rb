@@ -5,10 +5,9 @@ class Admin::AutoRepliesController < Admin::BasesController
    @auto_reply = AutoReply.new
   end
 
-
-
   def edit
-    @auto_reply = AutoReply.find(params[:id])
+    @auto_reply = AutoReply.includes(:friend).find(params[:id])
+    @auto_reply.user_str = "#{@auto_reply.friend.id} #{@auto_reply.friend.NickName}"
   end
 
   private

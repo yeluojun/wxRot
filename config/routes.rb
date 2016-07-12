@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       post 'weixins/save', to: 'weixins#save_weixin'
       get 'friends/friends', to: 'friends#friends'
       post 'auto_replies', to: 'auto_replies#create'
+      delete 'auto_replies/:id', to: 'auto_replies#destroy'
     end
   end
 

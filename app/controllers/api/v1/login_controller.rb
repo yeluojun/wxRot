@@ -1,4 +1,5 @@
 class Api::V1::LoginController < ApplicationController
+
   before_action :set_wx
   def get_uuid
     render json: { code: 200, data: @wx.get_uuid}

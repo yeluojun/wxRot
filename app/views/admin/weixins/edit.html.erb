@@ -3,14 +3,45 @@
 <hr>
 <h5>配置好友自动回复</h5>
 
-<a class="btn btn-success" href="/admin/auto_replies/new?wxuin=<%= @rot.wxuin %>">新增</a>
-<table class="table table-bordered">
-	<th>
-		<td>标记</td>
-	　<td>自动回复的内容</td>
-	　<td>对应的好友</td>
-	  <td>操作</td>
-	</th>
-
+<a class="btn btn-primary" href="/admin/auto_replies/new?wxuin=<%= @rot.wxuin %>">新增</a>
+<table class="table table-bordered" id="auto-replies">
+  <thead>
+  <tr>
+  <td>ID</td>
+  <td>标记</td>
+  <td>自动回复的内容</td>
+  <td>对应的好友</td>
+  <td>操作</td>
+  </tr>
+  </thead>
+  <tbody>
+  <% @auto_replies.each do |reply|%>
+    <tr>
+      <td><%= reply.id %></td>
+      <td><%= reply.flag_string %></td>
+      <td><%= reply.content %></td>
+      <td><%= reply.user_str %></td>
+      <td>
+	      <a class="btn btn-primary" href="/admin/auto_replies/<%= reply.id %>/edit?wxuin=<%= @wxuin %>"+>修改</a>
+	      <a  data-id="<%= reply.id %>" class="btn btn-danger delete">删除</a>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
 </table>
+
+<div class="content">
+  <h5>配置全局私聊自动回复</h5>
+  <a class="btn btn-primary">添加</a>
+</div>
+
+<div class="content">
+  <h5>配置'@'的自动回复</h5>
+  <a class="btn btn-primary">添加</a>
+</div>
+
+<div class="content">
+	<h5>配置定时推送(比较麻烦)</h5>
+  <a CLASS="btn btn-primary">添加</a>
+</div>
 

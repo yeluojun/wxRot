@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160711080419) do
+ActiveRecord::Schema.define(version: 20160712092059) do
 
   create_table "auto_replies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
     t.string   "wxuin"
@@ -20,6 +20,15 @@ ActiveRecord::Schema.define(version: 20160711080419) do
     t.string   "content"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+  end
+
+  create_table "auto_reply_globals", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.string   "wxuin",                   null: false
+    t.integer  "flag",        default: 0, null: false, comment: "0表示普通全局回复1表示@"
+    t.string   "flag_string",             null: false
+    t.string   "content",                 null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
   end
 
   create_table "friends", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
@@ -54,6 +63,19 @@ ActiveRecord::Schema.define(version: 20160711080419) do
     t.string   "EncryChatRoomId"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+  end
+
+  create_table "timing_replies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.string   "wxuin",                       null: false
+    t.string   "flag_string",                 null: false
+    t.string   "content",                     null: false
+    t.datetime "do_at",                                    comment: "特定的时间"
+    t.integer  "timeing_reply", default: 1,                comment: "定时的时间间隔"
+    t.string   "timeing_unit",  default: "h",              comment: "m表示分钟, h表示小时, d表示天"
+    t.integer  "friend_id",     default: 0,                comment: "0表示全局回复, 其他表示对单个朋友回复"
+    t.integer  "status",        default: 0
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
