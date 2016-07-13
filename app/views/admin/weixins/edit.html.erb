@@ -4,7 +4,7 @@
 <h5>配置好友自动回复</h5>
 
 <a class="btn btn-primary" href="/admin/auto_replies/new?wxuin=<%= @rot.wxuin %>">新增</a>
-<table class="table table-bordered" id="auto-replies">
+<table class="table table-bordered reply"  data-api="/api/v1/auto_replies/" id="auto-replies" <%= 'hidden' if @auto_replies.blank?%>>
   <thead>
   <tr>
   <td>ID</td>
@@ -32,12 +32,62 @@
 
 <div class="content">
   <h5>配置全局私聊自动回复</h5>
-  <a class="btn btn-primary">添加</a>
+  <a class="btn btn-primary" href="/admin/auto_reply_globals/new?wxuin=<%= @rot.wxuin %>">添加</a>
+	<table class="table table-bordered reply"  data-api="/api/v1/auto_reply_globals/" <%= 'hidden' if @auto_reply_g_normal.blank?%> id="auto-reply-g-normal">
+		<thead>
+		  <tr>
+		    <td>ID</td>
+		    <td>标记</td>
+		    <td>自动回复的内容</td>
+		    <td>回复类型</td>
+		    <td>操作</td>
+		  </tr>
+		</thead>
+		<tbody>
+		<% @auto_reply_g_normal.each do |n| %>
+		  <tr>
+			  <td><%= n.id %></td>
+			  <td><%= n.flag_string %></td>
+			  <td><%= n.content %></td>
+			  <td>普通回复</td>
+			  <td>
+			    <a class="btn btn-primary" href="/admin/auto_reply_globals/<%= n.id %>/edit?wxuin=<%= @wxuin %>"+>修改</a>
+			    <a  data-id="<%= n.id %>" class="btn btn-danger delete">删除</a>
+			  </td>
+		  </tr>
+			<% end %>
+		</tbody>
+	</table>
 </div>
 
 <div class="content">
   <h5>配置'@'的自动回复</h5>
-  <a class="btn btn-primary">添加</a>
+  <a class="btn btn-primary" href="/admin/auto_reply_globals/new?wxuin=<%= @rot.wxuin %>&flag=1">添加</a>
+	<table class="table table-bordered reply" data-api="/api/v1/auto_reply_globals/"  <%= 'hidden' if @auto_reply_g_at.blank? %>>
+		<thead>
+		<tr>
+		  <td>ID</td>
+		  <td>标记</td>
+		  <td>自动回复的内容</td>
+		  <td>回复类型</td>
+		  <td>操作</td>
+		</tr>
+		</thead>
+		<tbody>
+		<% @auto_reply_g_at.each do |n| %>
+		  <tr>
+		    <td><%= n.id %></td>
+		    <td><%= n.flag_string %></td>
+		    <td><%= n.content %></td>
+		    <td>@回复</td>
+		    <td>
+		      <a class="btn btn-primary" href="/admin/auto_reply_globals/<%= n.id %>/edit?wxuin=<%= @wxuin %>"+>修改</a>
+		      <a data-id="<%= n.id %>" class="btn btn-danger delete">删除</a>
+		    </td>
+		  </tr>
+		<% end %>
+		</tbody>
+	</table>
 </div>
 
 <div class="content">

@@ -5,7 +5,9 @@ class Api::V1::AutoReplyGlobalsController < Api::V1::BasesController
     auto_reply_g = global_auto_params_permit
     auto_reply_g[:wxuin] = params[:wxuin]
     if auto_reply_g[:id].blank?
+      auto_reply_g.delete :id
       return render json: { code: 400, msg: '系统已经存在相同的配置' } if AutoReplyGlobal.where(auto_reply_g).exists?
+      p auto_reply_g
       @auto_reply_g = AutoReplyGlobal.create!(auto_reply_g)
     else
       return render json: { code: 400, msg: '系统已经存在相同的配置' } if AutoReplyGlobal.where(auto_reply_g).where.not(id: auto_reply_g[:id]).exists?

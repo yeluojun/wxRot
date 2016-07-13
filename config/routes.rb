@@ -18,6 +18,8 @@ Rails.application.routes.draw do
       get 'friends/friends', to: 'friends#friends'
       post 'auto_replies', to: 'auto_replies#create'
       delete 'auto_replies/:id', to: 'auto_replies#destroy'
+      post 'auto_reply_globals', to: 'auto_reply_globals#create'
+      delete 'auto_reply_globals/:id', to: 'auto_reply_globals#destroy'
     end
   end
 

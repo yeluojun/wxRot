@@ -3,7 +3,8 @@ $(function(){
     return false;
   }
 
-  $('#auto-replies').on('click','.delete', function(){
+  $('.reply').on('click','.delete', function(){
+    var url = this.parentNode.parentNode.parentNode.parentNode.getAttribute('data-api') + this.getAttribute('data-id');
     var success = function(data){
       if (data.code === 200){
         this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)
@@ -15,7 +16,7 @@ $(function(){
       ye.alert('网络异常或服务器错误,请稍后重试');
     };
     $.ajax({
-      url: '/api/v1/auto_replies/' + this.getAttribute('data-id'),
+      url: url,
       type: 'DELETE',
       data: {},
       success: success.bind(this),

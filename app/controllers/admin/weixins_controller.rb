@@ -20,9 +20,23 @@ class Admin::WeixinsController < Admin::BasesController
   def edit
     @wxuin = params[:wxuin]
     @rot = Weixin.find_by('wxuin', @wxuin)
+
+    # 对人的自动回复
     @auto_replies = AutoReply.includes(:friend).where(wxuin: @wxuin)
     @auto_replies.each do |reply|
       reply.user_str = reply.friend.NickName
+    end
+
+    # 全局自动回复/@自动回复
+    @auto_reply_g_normal = []
+    @auto_reply_g_at = []
+    @auto_reply_globals = AutoReplyGlobal.where(wxuin: @wxuin)
+    @auto_reply_globals.each do |reply|
+      if reply.flag == 0
+        @auto_reply_g_normal.push reply
+      elsif reply.flag == 1
+        @auto_reply_g_at.push reply
+      end
     end
   end
 end
