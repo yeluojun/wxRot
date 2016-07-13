@@ -44,7 +44,6 @@ class WxHeartJob < ApplicationJob
       data = JSON.parse @wx.get_wx_contact_member_list wx_data['pass_ticket'], wx_data['skey'], cookies
 
       # 更新联系人列表
-      p data
       data['MemberList'].each do |ret|
         user = Friend.where(UserName: ret['UserName'], wxuin: uin).first
         params = Friend.params ret
@@ -82,6 +81,13 @@ class WxHeartJob < ApplicationJob
           # 获取更新
           base = { BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"}, SyncKey: synckey , rr: Time.now.to_i }
           data = JSON.parse @wx.webwxsync wx_data, base, cookies
+
+          # 更新 synckey
+          syn_string = ''
+          data['SyncKey']['List'].each do |list|
+            syn_string += "#{list['Key']}_#{list['Val']}|"
+          end
+          params[:synckey] =  syn_string = syn_string.chop
         end
       rescue => ex
         p 'some error:', ex.message
