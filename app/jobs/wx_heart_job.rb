@@ -1,4 +1,5 @@
 class WxHeartJob < ApplicationJob
+  # TODO 先数据库实现,再缓存实现
   queue_as :default
 
   # 心跳包任务
@@ -25,7 +26,7 @@ class WxHeartJob < ApplicationJob
       return
     end
 
-    # 更新机器人状态
+    # 更新机器人状态 # 没叼用
     rob = Weixin.where(wxuin: uin).first
     if rob.blank?
       Weixin.create!(wxuin: uin, status: 1, name: wx_data['NickName'], encry_name: wx_data['UserName']) # 创建一个正在运行的机器人
@@ -49,21 +50,21 @@ class WxHeartJob < ApplicationJob
       $redis.set("wxRot_MemberList##{uin}", data['MemberList'].to_json)
       $redis.expire("wxRot_MemberList##{uin}", 300)
 
-      # data['MemberList'].each do |ret|
-      #   begin
-      #     user = Friend.where(wxuin: uin).delete_all
-      #     params = Friend.params ret
-      #     params[:wxuin] = uin
-      #     if user.blank?
-      #       user = Friend.new(params)
-      #       user.save
-      #     else
-      #       user.update(params)
-      #     end
-      #   rescue => ex
-      #     p 'update member list failed:', ex.message
-      #   end
-      # end
+      data['MemberList'].each do |ret|
+        begin
+          user = Friend.where(wxuin: uin).delete_all
+          params = Friend.params ret
+          params[:wxuin] = uin
+          if user.blank?
+            user = Friend.new(params)
+            user.save
+          else
+            user.update(params)
+          end
+        rescue => ex
+          p 'update member list failed:', ex.message
+        end
+      end
     end
 
     # 开启心跳之旅
@@ -116,13 +117,15 @@ class WxHeartJob < ApplicationJob
       rescue => ex
         err_time += 1
         if err_time >= 5
-          p 'some error:', ex.message
-            rob.update!(status: 0)
+          # p 'some error:', ex.message
+          # rob.update!(status: 0)
+          $redis.del("wxRot_list##{uin}")
           break
         end
       end
       $redis.expire("wxRot_list##{uin}", 300)
       $redis.expire("wxRot_cookies##{uin}", 300)
+      $redis.expire("wxRot_MemberList##{uin}", 300)
       sleep 1
     end
     # TODO 等待子线程完成后再结束父级进程

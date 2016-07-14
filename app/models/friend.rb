@@ -1,5 +1,5 @@
 class Friend < ApplicationRecord
-  has_many :auto_replies
+  has_many :auto_replies, dependent: :destroy
   class << self
     def params(data)
       {
