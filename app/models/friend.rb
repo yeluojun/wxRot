@@ -2,15 +2,14 @@ class Friend < ApplicationRecord
   has_many :auto_replies
   class << self
     def params(data)
-
       {
         Uin: data['Uin'],
         UserName: data['UserName'],
-        NickName: data['NickName'],
+        NickName: resolving_emoji(data['NickName']),
         HeadImgUrl: data['HeadImgUrl'],
         ContactFlag: data['ContactFlag'],
         MemberCount: data['MemberCount'],
-        RemarkName: data['RemarkName'],
+        RemarkName: resolving_emoji(data['RemarkName']),
         HideInputBarFlag: data['HideInputBarFlag'],
         Sex: data['Sex'],
         Signature: data['Signature'],
@@ -33,7 +32,21 @@ class Friend < ApplicationRecord
         KeyWord: data['KeyWord'],
         EncryChatRoomId: data['EncryChatRoomId'],
       }
+    end
 
+    # 解析emoji表情
+    def resolving_emoji(emoji)
+      begin
+        res = /<span.*?class="emoji emoji(.*?)"><\/span>/
+        if res =~ emoji.to_s
+          emoji = emoji.gsub(res, WeixinCommon::EMOJI_FACE_MAP["#{$1}"])
+          emoji
+        else
+          emoji
+        end
+      rescue => ex
+        emoji
+      end
     end
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160712092059) do
+ActiveRecord::Schema.define(version: 20160714034033) do
 
   create_table "auto_replies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
     t.string   "wxuin"
@@ -31,6 +31,16 @@ ActiveRecord::Schema.define(version: 20160712092059) do
     t.datetime "updated_at",              null: false
   end
 
+  create_table "chat_histories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.string   "MsgId"
+    t.string   "FromUserName"
+    t.string   "ToUserName"
+    t.string   "MsgType"
+    t.text     "Content",      limit: 65535
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+  end
+
   create_table "friends", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
     t.string   "wxuin"
     t.string   "Uin"
@@ -42,12 +52,12 @@ ActiveRecord::Schema.define(version: 20160712092059) do
     t.string   "RemarkName"
     t.string   "HideInputBarFlag"
     t.string   "Sex"
-    t.string   "Signature"
+    t.text     "Signature",        limit: 65535
     t.string   "VerifyFlag"
     t.string   "OwnerUin"
-    t.string   "PYInitial"
-    t.string   "PYQuanPin"
-    t.string   "RemarkPYInitial"
+    t.text     "PYInitial",        limit: 65535
+    t.text     "PYQuanPin",        limit: 65535
+    t.text     "RemarkPYInitial",  limit: 65535
     t.string   "StarFriend"
     t.string   "AppAccountFlag"
     t.string   "Statues"
@@ -61,8 +71,18 @@ ActiveRecord::Schema.define(version: 20160712092059) do
     t.string   "ChatRoomId"
     t.string   "KeyWord"
     t.string   "EncryChatRoomId"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+  end
+
+  create_table "group_members", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "groups", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "timing_replies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|

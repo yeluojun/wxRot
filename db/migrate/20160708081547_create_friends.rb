@@ -11,12 +11,12 @@ class CreateFriends < ActiveRecord::Migration[5.0]
       t.string :RemarkName #
       t.string :HideInputBarFlag #
       t.string :Sex #
-      t.string :Signature #
+      t.text :Signature #
       t.string :VerifyFlag #
       t.string :OwnerUin #
-      t.string :PYInitial #
-      t.string :PYQuanPin #
-      t.string :RemarkPYInitial  #
+      t.text :PYInitial #
+      t.text :PYQuanPin #
+      t.text :RemarkPYInitial  #
       t.string :StarFriend  #
       t.string :AppAccountFlag  #
       t.string :Statues  #
