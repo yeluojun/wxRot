@@ -76,7 +76,6 @@ module WxApi
     def get_wx_contact_member_list(pass_ticket, skey, cookies)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetcontact?pass_ticket=#{pass_ticket}&r=#{Time.now.to_i}&seq=0&skey=#{skey}"
       RestClient.get url, cookies: cookies
-
     end
 
     # 获取群组列表
@@ -104,6 +103,14 @@ module WxApi
       RestClient.post(url, params.to_json, cookies: cookies)
     end
 
+    # 文字信息
+    def send_msg(pass_ticket, params, cookies)
+      url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsg?pass_ticket=#{pass_ticket}"
+      p '自动回复的路径：', url
+      p '自动回复的参数：', params
+      p '自动回复COOKIES:', cookies
+      RestClient.post(url, params.to_json)
+    end
 
     private
 

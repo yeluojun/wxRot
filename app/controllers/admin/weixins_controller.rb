@@ -19,7 +19,8 @@ class Admin::WeixinsController < Admin::BasesController
   # TODO 关于群组的一概不管先　
   def edit
     @wxuin = params[:wxuin]
-    @rot = Weixin.find_by('wxuin', @wxuin)
+    # @rot = Weixin.find_by('wxuin', @wxuin)
+    @rot = JSON.parse($redis.get("wxRot_list##{@wxuin}"))
 
     # 对人的自动回复
     @auto_replies = AutoReply.includes(:friend).where(wxuin: @wxuin)

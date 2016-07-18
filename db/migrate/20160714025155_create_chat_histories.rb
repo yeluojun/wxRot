@@ -6,6 +6,7 @@ class CreateChatHistories < ActiveRecord::Migration[5.0]
       t.string :ToUserName
       t.string :MsgType
       t.text :Content
+      t.string :wxuin
       t.timestamps
     end
   end

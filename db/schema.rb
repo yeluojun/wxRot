@@ -37,6 +37,7 @@ ActiveRecord::Schema.define(version: 20160714034033) do
     t.string   "ToUserName"
     t.string   "MsgType"
     t.text     "Content",      limit: 65535
+    t.string   "wxuin"
     t.datetime "created_at",                 null: false
     t.datetime "updated_at",                 null: false
   end
