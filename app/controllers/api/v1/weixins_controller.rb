@@ -39,7 +39,7 @@ class Api::V1::WeixinsController < Api::V1::BasesController
        begin
          data = JSON.parse @wx.get_wx_contact_member_list wx['pass_ticket'], wx['skey'], params[:cookies]
          return render json: { code: 500, msg: '微信初始化失败: 获取联系人失败' } if data['BaseResponse']['Ret'].to_i == 1
-         $redis.set("wxRot_##{wx[:wxuin]}#friends", data['MemberList'])
+         $redis.set("wxRot_##{wx[:wxuin]}#friends", data['MemberList'].to_json)
        rescue => ex
          return render json: { code: 500, msg: "微信初始化失败: #{ex.message}" }
        end
@@ -59,7 +59,7 @@ class Api::V1::WeixinsController < Api::V1::BasesController
         List: group_list
       }
       data = @wx.get_wx_batchget_contact wx['pass_ticket'],base , params[:cookies]
-      $redis.set("wxRot_##{wx[:wxuin]}#groups", data['ContactList'])
+      $redis.set("wxRot_##{wx[:wxuin]}#groups", data['ContactList'].to_json)
     end
 
     save_friends_thread.join
