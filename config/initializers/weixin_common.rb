@@ -1,4 +1,6 @@
 module WeixinCommon
+
+  # 微信emoji表情
   EMOJI_FACE_MAP =  {
       '1f604' => '',
       '1f60a' => '',
@@ -169,4 +171,16 @@ module WeixinCommon
       'ae' => '',
       '2122' => ''
   }
+
+  #　微信uin列表
+  WEIXIN_UINS = []
+
+  # 微信胖友列表
+  WEIXIN_FRIEND_LIST = {}
+
+  # 微信群组列表
+  WEIXIN_GROUP_LIST = {}
+
+  # 微信的所有相关票据
+  WEIXIN_TICKET_LIST = {}
 end

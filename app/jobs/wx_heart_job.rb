@@ -27,21 +27,13 @@ class WxHeartJob < ApplicationJob
     # 更新机器人状态 # 没叼用
     rob = Weixin.where(wxuin: uin).first
 
-    # 保存
-    $redis.set("wxRot_list##{uin}", wx_data.to_json)
-    $redis.expire("wxRot_list##{uin}", 300)
-
-    # 保存cookie
-    $redis.set("wxRot_cookies##{uin}", cookies.to_json)
-    $redis.expire("wxRot_cookies##{uin}", 300)
-
     # 获取所有的联系人列表
     Thread.new do
       data = JSON.parse @wx.get_wx_contact_member_list wx_data['pass_ticket'], wx_data['skey'], cookies
 
       # 更新联系人列表
-      $redis.set("wxRot_MemberList##{uin}", data['MemberList'].to_json)
-      $redis.expire("wxRot_MemberList##{uin}", 300)
+      # $redis.set("wxRot_MemberList##{uin}", data['MemberList'].to_json)
+      # $redis.expire("wxRot_MemberList##{uin}", 300)
 
       data['MemberList'].each do |ret|
         begin
@@ -93,7 +85,7 @@ class WxHeartJob < ApplicationJob
           # 自动回复
           Thread.new do
             data['AddMsgList'].each do |msg|
-              auto_reply_global unless auto_reply(msg, wx_data, cookies)
+              auto_reply_global(msg, wx_data, cookies) unless auto_reply(msg, wx_data, cookies)
             end
           end
         end
@@ -101,17 +93,19 @@ class WxHeartJob < ApplicationJob
       rescue => ex
         err_time += 1
         if err_time >= 5
-          $redis.del("wxRot_list##{uin}")
+          # $redis.del("wxRot_list##{uin}")
           break
         end
       end
-      $redis.expire("wxRot_list##{uin}", 300)
-      $redis.expire("wxRot_cookies##{uin}", 300)
-      $redis.expire("wxRot_MemberList##{uin}", 300)
+      # $redis.expire("wxRot_list##{uin}", 300)
+      # $redis.expire("wxRot_cookies##{uin}", 300)
+      # $redis.expire("wxRot_MemberList##{uin}", 300)
       sleep 1
     end
     # TODO 等待子线程完成后再结束父级进程
   end
+
+  private
 
   # 保存聊天记录
   def save_chat_history(msg_array, uin)
@@ -147,12 +141,10 @@ class WxHeartJob < ApplicationJob
         auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ?', '*', wx_data['wxuin']).first
         unless auto_reply_g.blank?
           base[:Msg][:Content] = auto_reply_g.content
-         @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+          @wx.send_msg(wx_data['pass_ticket'], base, cookies)
         end
       end
     elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] # 群聊
-
-
 
     end
   end
@@ -178,10 +170,4 @@ class WxHeartJob < ApplicationJob
     end
     false
   end
-
-  # 处理群聊@信息
-  def auto_reply_group(msg)
-
-  end
-
 end

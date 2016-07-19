@@ -51,11 +51,6 @@ module WxApi
       data = RestClient::Request.execute(method: :get, url: url)
       cookies = data.cookies
       data = Hash.from_xml(data)
-      # {"error"=>{"ret"=>"0", "message"=>"OK", "skey"=>"@crypt_9b7299e2_793a0a9fd7afaade20eaea9937e0a717",
-      #            "wxsid"=>"H0/ch7t+S6a2LVsH", "wxuin"=>"608120400",
-      #            "pass_ticket"=>"6Bk%2BWmSIOkEoiba6bUS%2BG6ijPwOkeDmVatpkqNmknrY%2BusWbGLnu9NFEKvXEF1tk",
-      #            "isgrayscale"=>"1"}}
-
       [data['error'], cookies]
     end
 
@@ -78,18 +73,17 @@ module WxApi
       RestClient.get url, cookies: cookies
     end
 
-    # 获取群组列表
-    # def get_wx_concact_group_list(pass_ticket)
-    #   url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxbatchgetcontact?type=ex&r=#{Time.now.to_i}&lang=zh_CN&pass_ticket=#{pass_ticket}"
-    #   JSON.parse RestClient::Request.execute(method: :post, url: url)
-    # end
+    # 这里主要用来获取群组的列表
+    def get_wx_batchget_contact(pass_ticket, params, cookies)
+      url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxbatchgetcontact?type=ex&r=#{Time.now.to_i}&lang=en_US&pass_ticket=#{pass_ticket}"
+      RestClient.post url, params.to_json, cookies: cookies
+    end
 
     # 搜索接口
     def search_contacts(wx_data, cookies, params)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsearchcontact?sid=#{wx_data['wxsid']}&skey=#{wx_data['skey']}&lang=en_US&pass_ticket=#{wx_data[:pass_ticket]}&seq=0&r=#{Time.now.to_i}"
       RestClient.post(url,  params.to_json , cookies: cookies)
     end
-
 
     # 检查 (类似心跳)
     def synccheck(params, cookies)
