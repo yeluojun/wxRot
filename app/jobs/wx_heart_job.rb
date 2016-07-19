@@ -4,8 +4,6 @@ class WxHeartJob < ApplicationJob
 
   # 心跳包任务
   def perform(*args)
-    p 'ping ping'
-
     @wx =  WxApi::Wx.new
     err_time = 0
     params = args.first
@@ -30,11 +28,9 @@ class WxHeartJob < ApplicationJob
     # 获取所有的联系人列表
     Thread.new do
       data = JSON.parse @wx.get_wx_contact_member_list wx_data['pass_ticket'], wx_data['skey'], cookies
-
       # 更新联系人列表
       # $redis.set("wxRot_MemberList##{uin}", data['MemberList'].to_json)
       # $redis.expire("wxRot_MemberList##{uin}", 300)
-
       data['MemberList'].each do |ret|
         begin
           Friend.where(wxuin: uin).delete_all
