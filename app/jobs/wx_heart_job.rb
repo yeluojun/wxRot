@@ -9,12 +9,10 @@ class WxHeartJob < ApplicationJob
     @wx =  WxApi::Wx.new
     err_time = 0
     params = args.first
-    uin, synckey, cookies  = params[:uin], params[:synckey], params[:cookies]
+    uin, synckey, cookies, syn_string  = params[:uin], params[:synckey], params[:cookies], ''
 
-    syn_string = ''
-    synckey['List'].each do |list|
-      syn_string += "#{list['Key']}_#{list['Val']}|"
-    end
+    # 更新synkey
+    synckey['List'].each { |list| syn_string += "#{list['Key']}_#{list['Val']}|" }
     syn_string = syn_string.chop
 
     weixin = WeixinTicket.where(wxuin: uin).order('id desc').first
@@ -28,11 +26,6 @@ class WxHeartJob < ApplicationJob
 
     # 更新机器人状态 # 没叼用
     rob = Weixin.where(wxuin: uin).first
-    # if rob.blank?
-    #   Weixin.create!(wxuin: uin, status: 1, name: wx_data['NickName'], encry_name: wx_data['UserName']) # 创建一个正在运行的机器人
-    # else
-    #   rob.update(status: 1, name: wx_data['NickName'], encry_name: wx_data['UserName']) # 更新机器人状态
-    # end
 
     # 保存
     $redis.set("wxRot_list##{uin}", wx_data.to_json)
@@ -88,11 +81,9 @@ class WxHeartJob < ApplicationJob
           data = JSON.parse @wx.webwxsync wx_data, base, cookies
 
           # 更新 synckey
-          syn_string = ''
-          data['SyncKey']['List'].each do |list|
-            syn_string += "#{list['Key']}_#{list['Val']}|"
-          end
-          params[:synckey] = syn_string = syn_string.chop
+          synckey, syn_string = data['SyncKey'], ''
+          data['SyncKey']['List'].each { |list| syn_string += "#{list['Key']}_#{list['Val']}|" }
+          syn_string = syn_string.chop
 
           # 保存聊天记录
           Thread.new do
@@ -102,9 +93,7 @@ class WxHeartJob < ApplicationJob
           # 自动回复
           Thread.new do
             data['AddMsgList'].each do |msg|
-              auto_reply_group msg
-              ret = auto_reply_global msg, wx_data, cookies
-              auto_reply data['AddMsgList'] if !ret
+              auto_reply_global unless auto_reply(msg, wx_data, cookies)
             end
           end
         end
@@ -112,8 +101,6 @@ class WxHeartJob < ApplicationJob
       rescue => ex
         err_time += 1
         if err_time >= 5
-          # p 'some error:', ex.message
-          # rob.update!(status: 0)
           $redis.del("wxRot_list##{uin}")
           break
         end
@@ -130,8 +117,7 @@ class WxHeartJob < ApplicationJob
   def save_chat_history(msg_array, uin)
     msg_array.each do |msg|
       begin
-        @history = ChatHistory.new({ MsgId: msg['MsgId'], FromUserName: msg['FromUserName'], ToUserName: msg['ToUserName'],MsgType: msg['MsgType'], Content: msg['MsgType'], wxuin: uin })
-        @history.save
+        @history = ::ChatHistory.create!({ MsgId: msg['MsgId'], FromUserName: msg['FromUserName'], ToUserName: msg['ToUserName'],MsgType: msg['MsgType'], Content: msg['MsgType'], wxuin: uin })
       rescue => ex
         p "#{uin}聊天记录保存失败:", ex.message
       end
@@ -139,32 +125,58 @@ class WxHeartJob < ApplicationJob
   end
 
   # 处理全局自动回复(只对应文字回复)
-  # TODO has many bug
+  # FIXME has many bug
   def auto_reply_global(msg, wx_data, cookies)
     # TODO 防止撤回
-    return if msg['MsgType'].to_i != 1
+    # return if msg['MsgType'].to_i != 1
     from_user = msg['FromUserName']
     to_user = msg['ToUserName'] # 这个才是我
-    p '这条信息是那个吊毛推送的？', from_user
-    if from_user[0,2] != '@@' # 私聊
-      p msg
-      content = msg['Content'].gsub('br/', '/n').strip
-      auto_reply_g = AutoReplyGlobal.where("(flag_string = ? or flag_string = '*') and wxuin = ?", content, wx_data['wxuin']).first
-      unless auto_reply_g.blank?
-        msg_id =  "#{Time.now.to_i}#{rand.to_s[0,5]}".gsub('.','')
-        base = {
-          BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"},
-          Msg: { ClientMsgId: msg_id, content: auto_reply_g.content, FromUserName: to_user, LocalID: msg_id, ToUserName: from_user, Type: 1 },
-        }
-        data = @wx.send_msg(wx_data['pass_ticket'], base, cookies)
-        p '自动回复的内容发送的结果是:', data
+    content = msg['Content'].gsub('br/', '/n').strip
+    msg_id =  "#{Time.now.to_i}#{rand.to_s[0,5]}".gsub('.','')
+    base = {
+      BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"},
+      Msg: { ClientMsgId: msg_id, FromUserName: to_user, LocalID: msg_id, ToUserName: from_user, Type: 1 },
+      Scene: 0
+    }
+    if from_user[0,2] != '@@' && from_user != wx_data['UserName'] # 私聊
+      auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ?', content, wx_data['wxuin']).first
+      if !auto_reply_g.blank?
+        base[:Msg][:Content] = auto_reply_g.content
+        @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+      else
+        auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ?', '*', wx_data['wxuin']).first
+        unless auto_reply_g.blank?
+          base[:Msg][:Content] = auto_reply_g.content
+         @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+        end
       end
-    end # 群聊
+    elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] # 群聊
+
+
+
+    end
   end
 
   # 处理个人的自动回复
-  def auto_reply(msg)
-
+  def auto_reply(msg, wx_data, cookies)
+    from_user = msg['FromUserName']
+    to_user = msg['ToUserName']
+    content = msg['Content'].gsub('br/', '/n').strip
+    msg_id =  "#{Time.now.to_i}#{rand.to_s[0,5]}".gsub('.','')
+    base = {
+      BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"},
+      Msg: { ClientMsgId: msg_id, FromUserName: to_user, LocalID: msg_id, ToUserName: from_user, Type: 1 },
+      Scene: 0
+    }
+    if from_user[0,2] != '@@' && from_user != wx_data['UserName'] # 私聊
+      auto_reply = AutoReply.where('flag_string = ? and wxuin = ?', content, wx['wxuin']).first
+      unless auto_reply.blank?
+        base[:Msg][:Content] = auto_reply.content
+        @wx.send_msg(wx_data['pass_ticket'], base, cookies) if Friend.where(id: auto_reply.id, UserName: from_user).exists?
+        return true
+      end
+    end
+    false
   end
 
   # 处理群聊@信息
