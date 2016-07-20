@@ -100,10 +100,43 @@ module WxApi
     # 文字信息
     def send_msg(pass_ticket, params, cookies)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsg?pass_ticket=#{pass_ticket}"
-      p '自动回复的路径：', url
-      p '自动回复的参数：', params
-      p '自动回复COOKIES:', cookies
       RestClient.post(url, params.to_json)
+    end
+
+    def char_with_tuliung(pass_ticket, params, cookies, user_name, question)
+      @tl = TuLing::Tl.new
+      begin
+        ret = JSON.parse @tl.chat_with_tl(question, '', user_name.get_all_num )
+        case ret['code'].to_i
+          when 100000
+            params[:Msg][:Content] = ret['text']
+            send_msg(pass_ticket, params, cookies)
+          when 200000
+            params[:Msg][:Content] = "#{ret['text']}\n#{ret['url']}"
+          when 302000
+            text = ret['text'] + "\n\n"
+            ret['list'].each do |l|
+              text += "[#{ l['source'] }]#{l['article']}\n链接：#{l['detailurl']}\n\n"
+            end
+            params[:Msg][:Content] = text
+            send_msg(pass_ticket, params, cookies)
+          when 308000
+            text = ret['text'] + "\n\n"
+            ret['list'].each do |l|
+              text += "名称：#{l['name']}\n配料：#{l['info']}\n链接：#{l['detailurl']} \n\n"
+            end
+            params[:Msg][:Content] = text
+            send_msg(pass_ticket, params, cookies)
+          else
+            params[:Msg][:Content] = '抱歉，机器人死掉了　＝．＝'
+            send_msg(pass_ticket, params, cookies)
+        end
+
+      rescue => ex
+        p '错误是: ',ex.message
+        params[:Msg][:Content] = '抱歉，机器人死掉了　＝．＝'
+        send_msg(pass_ticket, params, cookies)
+      end
     end
 
     private
