@@ -4,13 +4,15 @@ $(function(){
     return;
   }
 
-  wxData = { prelogin: false };
+  var wxData = { prelogin: false };
 
   // 微信登陆
   var login = function(data){
     if (!wxData.prelogin){
+      console.log('stop login');
       return false;
     }
+    console.log(wxData);
     $.ajax({url: '/api/v1/weixins/login', data: {uuid: data}, data_type: 'json', success:
       function(ret){
         if(ret.code !== 200){
@@ -29,6 +31,7 @@ $(function(){
   
   // 获取各种ticket
   var get_tickets = function (wxData) {
+
     $.ajax({url: '/api/v1/weixins/tickets', data: {uuid: wxData.uuid, ticket: wxData.ticket, scan: wxData.scan}, data_type: 'json', success:
       function(data){
         wxData.skey = data.data.skey;
@@ -60,10 +63,10 @@ $(function(){
   $('#add-wxbot').on('click', function () {
     $('#qr').html('');
     $('#qr-msg').html('');
+    wxData.prelogin = true;
     var success = function (data) {
       wxData.uuid = data.data;
       $('#qr').html("<img style='width: 150px; height: 150px' src='/qrs/"+ data.data+ ".png'>");
-      wxData.prelogin = true;
       login(wxData.uuid)
     };
     var error = function (data) {
@@ -80,7 +83,10 @@ $(function(){
 
   // 取消添加机器人,取消准备登陆的状态
   $('#btn-cancel').on('click', function () {
+    alert('!');
     wxData.prelogin = false;
+    console.log('cancel');
+    console.log(wxData);
   })
 
 });

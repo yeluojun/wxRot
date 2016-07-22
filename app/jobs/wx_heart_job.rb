@@ -56,7 +56,6 @@ class WxHeartJob < ApplicationJob
       begin
         data = @wx.synccheck params, cookies
         if data.include? '1100' #失败 or 退出登陆了
-          rob.update!(status: 0) # 更新机器人状态
           break
         elsif data.include? "selector:\"0\""
           # do nothing
@@ -78,7 +77,28 @@ class WxHeartJob < ApplicationJob
           # 自动回复
           Thread.new do
             data['AddMsgList'].each do |msg|
-              auto_reply_global(msg, wx_data, cookies) unless auto_reply(msg, wx_data, cookies)
+              case msg['MsgType'].to_i
+                when 37 # 添加好友申请
+
+                  base = {
+                    BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"},
+                    Opcode: 3,
+                    SceneList:[33],
+                    SceneListCount:1,
+                    VerifyContent: '',
+                    VerifyUserList: [{
+                      Value: msg['RecommendInfo']['UserName'],
+                      VerifyUserTicket: msg['RecommendInfo']['Ticket']
+                    }],
+                    VerifyUserListSize: 1,
+                    skey: wx_data['skey']
+                  }
+                  data = @wx.friend_request_accept(wx_data['pass_ticket'], base ,cookies)
+                  p 'accept friend response:', data
+                else
+                  auto_reply_global(msg, wx_data, cookies) unless auto_reply(msg, wx_data, cookies)
+              end
+
             end
           end
         end
@@ -147,7 +167,10 @@ class WxHeartJob < ApplicationJob
       end
     elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] # 群聊
 
+
+
     end
+
   end
 
   # 处理个人的自动回复

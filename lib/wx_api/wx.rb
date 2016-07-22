@@ -97,12 +97,31 @@ module WxApi
       RestClient.post(url, params.to_json, cookies: cookies)
     end
 
-    # 文字信息
+    # 发送文字信息
     def send_msg(pass_ticket, params, cookies)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsg?pass_ticket=#{pass_ticket}"
       RestClient.post(url, params.to_json)
     end
 
+    # 接收添加好友的邀请
+    # params: {
+    # BaseRequest: {}
+    # Opcode: 3
+    # SceneList:[33]
+    # SceneListCount:1
+    # VerifyContent:""
+    # VerifyUserList [{ Value, VerifyUserTicket}]
+    # VerifyUserListSize: 1
+    # skey : "@crypt_9e0f187f_9115a1ded938bb043072de90a77e9d42"
+    # }
+    def friend_request_accept(pass_ticket, params, cookies)
+      p 'add friend params: ',  params
+      url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxverifyuser?r=#{Time.now.to_i}&pass_ticket=#{pass_ticket}"
+      RestClient.post(url, params.to_json, cookies)
+    end
+
+
+    # 图灵机器人聊天
     def char_with_tuliung(pass_ticket, params, cookies, user_name, question)
       @tl = TuLing::Tl.new
       begin
