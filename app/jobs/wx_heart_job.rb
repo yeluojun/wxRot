@@ -167,8 +167,33 @@ class WxHeartJob < ApplicationJob
     elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] # 群聊
       # TODO 判断缓存中是否存在该群组，如果不存在 获取并保存
       # TODO 群显示名称？ ‘昵称’？ ‘微信名’
-    end
+      groups = begin
+        JSON.parse $redis.get("wxRot_##{wx_data['wxuin']}#groups")
+      rescue
+         []
+      end
 
+      if groups.blank?
+        # 重新获取群组
+      else
+        groups.each do |g|
+          if g['UserName'] == from_user
+            g['MemberList'].each do |m|
+              if m['UserName'] == wx_data['UserName']
+                display_name = m['DisplayName']
+                display_name = m['NickName'] if display_name.blank?
+                if content.include? "@#{display_name} " # 包含@我的信息
+                    # from who
+                  user = content.split(':')[0]
+
+                  # TODO 自动回复
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
 
   # 处理个人的自动回复
