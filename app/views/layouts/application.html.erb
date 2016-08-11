@@ -7,33 +7,7 @@
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
-
   <body>
-  <div class="nav-top">
-     <h3>wxbot后台管理系统</h3>
-  </div>
-
-  <div class="row" style="margin-top: 10px">
-    <div class="col-md-2">
-      <div class="left-nav">
-        <ul class="nav nav-pills nav-stacked">
-          <li role="presentation" class="active"><a href="#">机器人管理</a></li>
-          <li role="presentation"><a href="#">数据分析</a></li>
-          <li role="presentation"><a href="#">退出登陆</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="well col-md-9" style="min-height: 1000px">
-
-      <%= yield %>
-    </div>
-  </div>
-
-  <div class="right">
-
-  </div>
-
-
-
+  <%= yield %>
   </body>
 </html>

@@ -56,6 +56,7 @@ class WxHeartJob < ApplicationJob
       begin
         data = @wx.synccheck params, cookies
         if data.include? '1100' #失败 or 退出登陆了
+          $redis.del("wxRot_list##{uin}")  # 删除缓存
           break
         elsif data.include? "selector:\"0\""
           # do nothing
@@ -79,7 +80,6 @@ class WxHeartJob < ApplicationJob
             data['AddMsgList'].each do |msg|
               case msg['MsgType'].to_i
                 when 37 # 添加好友申请
-
                   base = {
                     BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"},
                     Opcode: 3,
@@ -94,7 +94,6 @@ class WxHeartJob < ApplicationJob
                     skey: wx_data['skey']
                   }
                   data = @wx.friend_request_accept(wx_data['pass_ticket'], base ,cookies)
-                  p 'accept friend response:', data
                 else
                   auto_reply_global(msg, wx_data, cookies) unless auto_reply(msg, wx_data, cookies)
               end
@@ -157,18 +156,17 @@ class WxHeartJob < ApplicationJob
       else
         auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ?', '*', wx_data['wxuin']).first
         unless auto_reply_g.blank?
-          if auto_reply_g.content != 'tl'
+          if auto_reply_g.content != 'tl' # 全局非图灵机器人
             base[:Msg][:Content] = auto_reply_g.content
             @wx.send_msg(wx_data['pass_ticket'], base, cookies)
           else
-            @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content
+            @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content # 全局图灵机器人
           end
         end
       end
     elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] # 群聊
-
-
-
+      # TODO 判断缓存中是否存在该群组，如果不存在 获取并保存
+      # TODO 群显示名称？ ‘昵称’？ ‘微信名’
     end
 
   end

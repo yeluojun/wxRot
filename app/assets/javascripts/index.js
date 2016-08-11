@@ -13,7 +13,7 @@ window.onload =function(){
     $(this).addClass('disabled');
     var success = function (data) {
       if (data.code === 200){
-
+        window.location = '/admin'
       }else{
         ye.alert(data.msg)
       }

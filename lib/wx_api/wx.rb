@@ -79,7 +79,7 @@ module WxApi
       RestClient.post url, params.to_json, cookies: cookies
     end
 
-    # 搜索接口
+    # 搜索接口 (没有用)
     def search_contacts(wx_data, cookies, params)
       url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsearchcontact?sid=#{wx_data['wxsid']}&skey=#{wx_data['skey']}&lang=en_US&pass_ticket=#{wx_data[:pass_ticket]}&seq=0&r=#{Time.now.to_i}"
       RestClient.post(url,  params.to_json , cookies: cookies)
