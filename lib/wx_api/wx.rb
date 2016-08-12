@@ -122,22 +122,25 @@ module WxApi
 
 
     # 图灵机器人聊天
-    def char_with_tuliung(pass_ticket, params, cookies, user_name, question)
+    def char_with_tuliung(pass_ticket, params, cookies, user_name, question, display_name = nil)
       @tl = TuLing::Tl.new
       begin
         ret = JSON.parse @tl.chat_with_tl(question, '', user_name.get_all_num )
         case ret['code'].to_i
           when 100000
             params[:Msg][:Content] = ret['text']
+            params[:Msg][:Content] = display_name + params[:Msg][:Content] unless display_name.blank?
             send_msg(pass_ticket, params, cookies)
           when 200000
             params[:Msg][:Content] = "#{ret['text']}\n#{ret['url']}"
+            params[:Msg][:Content] = display_name + params[:Msg][:Content] unless display_name.blank?
           when 302000
             text = ret['text'] + "\n\n"
             ret['list'].each do |l|
               text += "[#{ l['source'] }]#{l['article']}\n链接：#{l['detailurl']}\n\n"
             end
             params[:Msg][:Content] = text
+            params[:Msg][:Content] = display_name + params[:Msg][:Content] unless display_name.blank?
             send_msg(pass_ticket, params, cookies)
           when 308000
             text = ret['text'] + "\n\n"
@@ -145,15 +148,17 @@ module WxApi
               text += "名称：#{l['name']}\n配料：#{l['info']}\n链接：#{l['detailurl']} \n\n"
             end
             params[:Msg][:Content] = text
+            params[:Msg][:Content] = display_name + params[:Msg][:Content] unless display_name.blank?
             send_msg(pass_ticket, params, cookies)
           else
             params[:Msg][:Content] = '抱歉，机器人死掉了　＝．＝'
+            params[:Msg][:Content] = display_name + params[:Msg][:Content] unless display_name.blank?
             send_msg(pass_ticket, params, cookies)
         end
-
       rescue => ex
         p '错误是: ',ex.message
         params[:Msg][:Content] = '抱歉，机器人死掉了　＝．＝'
+        params[:Msg][:Content] = display_name + params[:Msg][:Content] unless display_name.blank?
         send_msg(pass_ticket, params, cookies)
       end
     end

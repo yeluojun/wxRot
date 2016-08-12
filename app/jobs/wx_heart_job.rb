@@ -95,7 +95,7 @@ class WxHeartJob < ApplicationJob
                   }
                   data = @wx.friend_request_accept(wx_data['pass_ticket'], base ,cookies)
                 else
-                  auto_reply_global(msg, wx_data, cookies) unless auto_reply(msg, wx_data, cookies)
+                  auto_reply_global(msg, wx_data, cookies)
               end
 
             end
@@ -145,51 +145,66 @@ class WxHeartJob < ApplicationJob
       Scene: 0
     }
     if from_user[0,2] != '@@' && from_user != wx_data['UserName'] # 私聊
-      auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ?', content, wx_data['wxuin']).first
-      if !auto_reply_g.blank?
-        if auto_reply_g.content != 'tl'
-          base[:Msg][:Content] = auto_reply_g.content
-          @wx.send_msg(wx_data['pass_ticket'], base, cookies)
-        else
-          @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content
-        end
-      else
-        auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ?', '*', wx_data['wxuin']).first
-        unless auto_reply_g.blank?
-          if auto_reply_g.content != 'tl' # 全局非图灵机器人
-            base[:Msg][:Content] = auto_reply_g.content
-            @wx.send_msg(wx_data['pass_ticket'], base, cookies)
-          else
-            @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content # 全局图灵机器人
-          end
-        end
-      end
+      auto_reply(0,base,wx_data,cookies, content, from_user)
+      # auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ? and flag = 0', content, wx_data['wxuin']).first
+      # if !auto_reply_g.blank?
+      #   if auto_reply_g.content != 'tl'
+      #     base[:Msg][:Content] = auto_reply_g.content
+      #     @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+      #   else
+      #     @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content
+      #   end
+      #   auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ? and flag = 0', '*', wx_data['wxuin']).first
+      #   unless auto_reply_g.blank?
+      #     if auto_reply_g.content != 'tl' # 全局非图灵机器人
+      #       base[:Msg][:Content] = auto_reply_g.content
+      #       @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+      #     else
+      #       @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content # 全局图灵机器人
+      #     end
+      #   end
+      # end
     elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] # 群聊
       # TODO 判断缓存中是否存在该群组，如果不存在 获取并保存
       # TODO 群显示名称？ ‘昵称’？ ‘微信名’
+      user = content.split(':')[0]
+      from_display_name = ''
+
       groups = begin
         JSON.parse $redis.get("wxRot_##{wx_data['wxuin']}#groups")
       rescue
          []
       end
-
       if groups.blank?
-        # 重新获取群组
+        # TODO 重新获取群组
+        get_group_msg wx_data, from_user, cookies
       else
+        group = nil
         groups.each do |g|
-          if g['UserName'] == from_user
-            g['MemberList'].each do |m|
-              if m['UserName'] == wx_data['UserName']
-                display_name = m['DisplayName']
-                display_name = m['NickName'] if display_name.blank?
-                if content.include? "@#{display_name} " # 包含@我的信息
-                    # from who
-                  user = content.split(':')[0]
-
-                  # TODO 自动回复
-                end
-              end
+         if g['UserName'] == from_user
+            group = g
+            break
+          end
+        end
+        group =  get_group_msg(wx_data, from_user, cookies) if group.blank?
+        group['MemberList'].each do |m|
+          if m['UserName'] == user
+            from_display_name = m['DisplayName']
+            from_display_name = m['NickName'] if display_name.blank?
+            break
+          end
+        end
+        #查找出我
+        group['MemberList'].each do |m|
+          if m['UserName'] == wx_data['UserName']
+            display_name = m['DisplayName']
+            display_name = m['NickName'] if display_name.blank?
+            if content.include? "@#{display_name} " # 包含@我的信息
+              # from who
+              # TODO 自动回复
+              auto_reply(1, base, wx_data, cookies, content, from_user, display_name = "@#{from_display_name} ")
             end
+            break
           end
         end
       end
@@ -197,24 +212,51 @@ class WxHeartJob < ApplicationJob
   end
 
   # 处理个人的自动回复
-  def auto_reply(msg, wx_data, cookies)
-    # from_user = msg['FromUserName']
-    # to_user = msg['ToUserName']
-    # content = msg['Content'].gsub('br/', '/n').strip
-    # msg_id =  "#{Time.now.to_i}#{rand.to_s[0,5]}".gsub('.','')
-    # base = {
-    #   BaseRequest: { Uin: wx_data['wxuin'],Sid: wx_data['wxsid'] , Skey: wx_data['skey'], DeviceID: "e#{rand(999999999999999)}"},
-    #   Msg: { ClientMsgId: msg_id, FromUserName: to_user, LocalID: msg_id, ToUserName: from_user, Type: 1 },
-    #   Scene: 0
-    # }
-    # if from_user[0,2] != '@@' && from_user != wx_data['UserName'] # 私聊
-    #   auto_reply = AutoReply.where('flag_string = ? and wxuin = ?', content, wx['wxuin']).first
-    #   unless auto_reply.blank?
-    #     base[:Msg][:Content] = auto_reply.content
-    #     @wx.send_msg(wx_data['pass_ticket'], base, cookies) if Friend.where(id: auto_reply.id, UserName: from_user).exists?
-    #     return true
-    #   end
-    # end
-    false
+  def auto_reply(flag, base, wx_data, cookies, content, from_user, display_name = nil)
+    auto_reply_g = AutoReplyGlobal.where("(flag_string = ?) and wxuin = ? and flag = #{flag}", content, wx_data['wxuin']).first
+    if !auto_reply_g.blank?
+      if auto_reply_g.content != 'tl'
+        auto_reply_g.content = display_name + auto_reply_g.content unless display_name.blank?
+        base[:Msg][:Content] = auto_reply_g.content
+        @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+      else
+        @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content
+      end
+      auto_reply_g = AutoReplyGlobal.where("(flag_string = ?) and wxuin = ? and flag = #{flag}", '*', wx_data['wxuin']).first
+      unless auto_reply_g.blank?
+        if auto_reply_g.content != 'tl' # 全局非图灵机器人
+          base[:Msg][:Content] = auto_reply_g.content
+          @wx.send_msg(wx_data['pass_ticket'], base, cookies)
+        else
+          @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content # 全局图灵机器人
+        end
+      end
+    end
+  end
+
+  # 获取群组信息
+  def get_group_msg(wx, username, cookies)
+    # 获取以前的群组信息
+    groups = $redis.get "wxRot_##{wx[:wxuin]}#groups"
+    unless  groups.blank?
+      groups = JSON.parse groups
+    end
+    group_list = []
+    group_list.push({ EncryChatRoomId: '', UserName: username })
+    base = {
+      BaseRequest: { Uin: wx['wxuin'],Sid: wx['wxsid'] , Skey: wx['skey'], DeviceID: "e#{rand(999999999999999)}"},
+      Count: group_list.length,
+      List: group_list
+    }
+    data = JSON.parse @wx.get_wx_batchget_contact wx['pass_ticket'], base , cookies
+
+    if groups.blank?
+      $redis.set("wxRot_##{wx[:wxuin]}#groups", data['ContactList'].to_json)
+    else
+      groups.push(data['ContactList'][0])
+      $redis.set("wxRot_##{wx[:wxuin]}#groups", groups.to_json)
+    end
+    $redis.expire("wxRot_##{wx[:wxuin]}#groups", 300)
+    data['ContactList'][0]
   end
 end
