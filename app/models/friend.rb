@@ -39,6 +39,7 @@ class Friend < ApplicationRecord
       begin
         res = /<span.*?class="emoji emoji(.*?)"><\/span>/
         if res =~ emoji.to_s
+          p $1, $2
           emoji = emoji.gsub(res, WeixinCommon::EMOJI_FACE_MAP["#{$1}"])
           emoji
         else

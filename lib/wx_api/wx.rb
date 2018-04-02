@@ -1,4 +1,4 @@
-require 'rest-client'
+# require 'rest-client'
 require 'json'
 require 'active_support/all'
 # require 'ha'
@@ -124,6 +124,7 @@ module WxApi
     # 图灵机器人聊天
     def char_with_tuliung(pass_ticket, params, cookies, user_name, question, display_name = nil)
       @tl = TuLing::Tl.new
+      display_name = display_name + ' ' if display_name.present?
       begin
         ret = JSON.parse @tl.chat_with_tl(question, '', user_name.get_all_num )
         case ret['code'].to_i

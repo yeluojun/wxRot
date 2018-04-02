@@ -35,16 +35,17 @@ class Api::V1::WeixinsController < Api::V1::BasesController
     wx[:cookies] = params[:cookies]
 
     # 保存好友列表
-     save_friends_thread = Thread.new do
-       begin
-         data = JSON.parse @wx.get_wx_contact_member_list wx['pass_ticket'], wx['skey'], params[:cookies]
-         return render json: { code: 500, msg: '微信初始化失败: 获取联系人失败' } if data['BaseResponse']['Ret'].to_i == 1
-         $redis.set("wxRot_##{wx[:wxuin]}#friends", data['MemberList'].to_json)
-         $redis.expire("wxRot_##{wx[:wxuin]}#friends", 300)
-       rescue => ex
-         return render json: { code: 500, msg: "微信初始化失败: #{ex.message}" }
-       end
-     end
+    save_friends_thread = Thread.new do
+      # begin
+        data = JSON.parse(@wx.get_wx_contact_member_list wx['pass_ticket'], wx['skey'], params[:cookies])
+        return render json: { code: 500, msg: '微信初始化失败: 获取联系人失败' } if data['BaseResponse']['Ret'].to_i == 1
+        $redis.set("wxRot_##{wx[:wxuin]}#friends", data['MemberList'].to_json)
+        $redis.expire("wxRot_##{wx[:wxuin]}#friends", 300)
+      # rescue => ex
+        # p 'what happend??', ex
+        # return render json: { code: 500, msg: "微信初始化失败: #{ex.message}" }
+      # end
+    end
 
     # 保存群组列表(最近联系的群组)
     sve_group_thread = Thread.new do
@@ -59,9 +60,9 @@ class Api::V1::WeixinsController < Api::V1::BasesController
         Count: group_list.length,
         List: group_list
       }
-      p 'params of get groups is: ', base
-      data = JSON.parse @wx.get_wx_batchget_contact wx['pass_ticket'], base , params[:cookies]
-      p data
+      # p 'params of get groups is: ', base
+      data = JSON.parse @wx.get_wx_batchget_contact(wx['pass_ticket'], base , params[:cookies])
+      # p data
       $redis.set("wxRot_##{wx[:wxuin]}#groups", data['ContactList'].to_json)
       $redis.expire("wxRot_##{wx[:wxuin]}#groups", 300)
     end
@@ -73,6 +74,7 @@ class Api::V1::WeixinsController < Api::V1::BasesController
     $redis.set("wxRot_list##{wx[:wxuin]}", wx.to_json)
     $redis.expire("wxRot_list##{wx[:wxuin]}", 300)
 
+    # WxHeartJob.perform_now({synckey: @data['SyncKey'], uin: wx[:wxuin]})  # 开启微信心跳的任务
     Thread.new do
       WxHeartJob.perform_now({synckey: @data['SyncKey'], uin: wx[:wxuin]})  # 开启微信心跳的任务
     end

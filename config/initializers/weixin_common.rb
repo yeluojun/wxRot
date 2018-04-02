@@ -171,7 +171,6 @@ module WeixinCommon
       'ae' => '',
       '2122' => ''
   }
-
   #　微信uin列表
   WEIXIN_UINS = []
 
