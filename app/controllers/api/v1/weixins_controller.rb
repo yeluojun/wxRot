@@ -28,6 +28,7 @@ class Api::V1::WeixinsController < Api::V1::BasesController
 
   # 微信初始化
   def weixinInit
+    $redis.keys.each{ |key| $redis.del(key) }
     @data = @wx.wx_init(params[:pass_ticket], params[:base])
     wx = params[:weixin]
     wx[:UserName] = @data['User']['UserName']

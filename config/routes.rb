@@ -20,13 +20,17 @@ Rails.application.routes.draw do
       delete 'auto_replies/:id', to: 'auto_replies#destroy'
       post 'auto_reply_globals', to: 'auto_reply_globals#create'
       delete 'auto_reply_globals/:id', to: 'auto_reply_globals#destroy'
+
     end
   end
 
   namespace :admin do
     get '/', to: 'index#index'
     get 'weixins', to: 'weixins#index'
-    get 'weixins/edit', to: 'weixins#edit'
+    get 'weixins/edit', to: 'weixins#edit', as: :weixins_edit
+    get 'weixins/groups', to: 'weixins#groups', as: 'weixins_groups'
+    post 'weixins/msg-tran', to: 'weixins#msg_tran', as: 'msg_tran'
+    delete 'weixins/tran-remove', to: 'weixins#tran_remove'
     resources :auto_replies
     resources :auto_reply_globals
   end

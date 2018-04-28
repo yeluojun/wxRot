@@ -1,0 +1,129 @@
+<h4 id="weixins-group-setting" data-id="<%= @group_id %>" >群消息转发配置<small><%= raw(@group_name.to_json.html_safe) %>&nbsp;<%= link_to '返回上层', admin_weixins_edit_path(wxuin: @uin )%></small></h4>
+
+<div class="content">
+  <h5>选择成员：</h5>
+  <ul class="list-group">
+  	<% @members.each do |m| %>
+  	  <li class="list-group-item" data-id="<%= m['UserName'] %>">
+  	  	<span><%= m['NickName'].present? ? raw(m['NickName'].html_safe) : 'no name' %></span>
+  	  	<a class='btn btn-sm tran'>消息转发</a>
+  	  </li>
+  	<% end %>
+  </ul>
+</div>
+
+<div class="content have-setting">
+  <h5>已经配置：</h5>
+  <ul class="list-group">
+  	<% @settings.each do |s| %>
+  	  <li class="list-group-item">
+  	  	<span>
+  	  		<%= s['from_name'] %>
+  	  		<span style="font-size: 12px">（<%= s['from_group_name'] %>）</span>
+  	  	</span>
+  	  	&nbsp;->&nbsp;
+  	  	<span><%= s['to_name'] %></span>
+  	  	<a class="btn btn-sm text-danger" data-from="<%= s['from'] %>" data-to="<%= s['to'] %>">删除</a>
+  	  </li>
+  	<% end %>
+  </ul>
+</div>
+
+<div class="modal fade" id="group-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">群组列表</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+        	<% @group.each do |g| %>
+        	  <li class="list-group-item">
+        	  	<input type="radio" name="group-item" value="<%= g['UserName'] %>">
+        	  	<span><%= g['NickName'].blank? ? 'no name' : raw(g['NickName'].html_safe) %></span>
+        	  </li>
+        	<% end %>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary ">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.tran').on('click', function () {
+   	  $('#group-modal').attr('data-user', $(this).parent().attr('data-id'));
+   	  $('#group-modal').attr('data-name', $(this).prev().text());
+      $('#group-modal').modal('show');
+    })
+
+    $('#group-modal .list-group li').on('click', function () {
+      $(this).children('input').click();
+    })
+
+    $('#group-modal .list-group li input').on('click', function (e) {
+    	e.stopPropagation();
+    })
+
+    $('.have-setting .text-danger').on('click', function () {
+    	var ts = $(this);
+    	$.ajax({
+   	  	url: '/admin/weixins/tran-remove',
+   	  	method: 'delete',
+   	  	data: {
+   	  		from: ts.attr('data-from'),
+   	  		to: ts.attr('data-to'),
+   	  		uin: <%= @uin.to_json.html_safe %>
+   	  	},
+   	  	success: function () {
+   	  		ts.parents('li').remove();
+
+   	  	},
+   	  	error: function () {
+   	  		alert('设置失败，服务器错误或网络异常');
+   	  	}
+   	  })
+    })
+
+    $('#group-modal .btn-primary').on('click', function () {
+    	var from = $('#group-modal').attr('data-user');
+    	var from_name = $('#group-modal').attr('data-name');
+    	var to = '';
+    	var to_name = ''
+
+    	$('#group-modal .list-group li').each( function () {
+    		var input = $(this).children('input');
+    		if (input.prop('checked') == true) {
+    			to = input.val();
+    			to_name = input.next().text();
+    		}
+      })
+
+   	  $.ajax({
+   	  	url: '/admin/weixins/msg-tran',
+   	  	method: 'POST',
+   	  	data: {
+   	  		from_group_id: <%= @group_id.to_json.html_safe %>,
+   	  		from_group_name: <%= @group_name.to_json.html_safe %>,
+   	  		from_name: from_name,
+   	  		from: from,
+   	  		to: to,
+   	  		to_name: to_name,
+   	  		uin: <%= @uin.to_json.html_safe %>
+   	  	},
+   	  	success: function () {
+   	  		alert('设置成功');
+   	  		window.location.reload();
+   	  	},
+   	  	error: function () {
+   	  		alert('设置失败，服务器错误或网络异常');
+   	  	}
+   	  })
+   })
+ })
+</script>

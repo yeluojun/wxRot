@@ -17,7 +17,7 @@ class WxHeartJob < ApplicationJob
       wx_data = JSON.parse $redis.get("wxRot_list##{uin}")
       cookies = wx_data['cookies']
     rescue => ex
-      p 'db error is :', ex.message
+      # p 'db error is :', ex.message
       return
     end
 
@@ -41,7 +41,7 @@ class WxHeartJob < ApplicationJob
 
     # 开启心跳之旅
     loop do
-      p 'ping ping ping...'
+      # p 'ping ping ping...'
       params = {
         _: Time.now.to_i + 1000,
         r: Time.now.to_i,
@@ -71,9 +71,9 @@ class WxHeartJob < ApplicationJob
           syn_string = syn_string.chop
 
           # 保存聊天记录
-          Thread.new do
-            save_chat_history data['AddMsgList'], uin
-          end
+          # Thread.new do
+          #   save_chat_history data['AddMsgList'], uin
+          # end
           # 自动回复
           Thread.new do
             data['AddMsgList'].each do |msg|
@@ -145,10 +145,11 @@ class WxHeartJob < ApplicationJob
       Msg: { ClientMsgId: msg_id, FromUserName: to_user, LocalID: msg_id, ToUserName: from_user, Type: 1 },
       Scene: 0
     }
-    p '来自谁?', from_user
-    p '发给谁?', to_user
-    p '内容?', content
-    p 'msg id ?', msg_id
+    # p '原信息是?', msg
+    # p '来自谁?', from_user
+    # p '发给谁?', to_user
+    # p '内容?', content
+    # p 'msg id ?', msg_id
 
     if to_user == 'filehelper'
       if content == 'stop' # 停止机器人
@@ -157,95 +158,82 @@ class WxHeartJob < ApplicationJob
 　　　　　$redis.set("#{wx_data['wxuin']}-control", 'start')
       end
     elsif from_user[0,2] != '@@' && from_user != wx_data['UserName'] && $redis.get("#{wx_data['wxuin']}-control") != 'stop' # 私聊
-      p '私聊回复'
+      # p '私聊回复'
       # TODO FIND THE REAL PEOPLE
       friends = JSON.parse($redis.get("wxRot_##{wx_data['wxuin']}#friends"))
       friend = get_friend_name(wx_data['wxuin'], from_user)
       auto_reply(0,base,wx_data,cookies, content, from_user) if friend.present? && friend['VerifyFlag'] == 0 # 判断这个是人
-      # friends.each do |friend|
-      #   if friend['UserName'] == from_user
-      #     p friend
-
-      #   end
-      # end
-
-      # auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ? and flag = 0', content, wx_data['wxuin']).first
-      # if !auto_reply_g.blank?
-      #   if auto_reply_g.content != 'tl'
-      #     base[:Msg][:Content] = auto_reply_g.content
-      #     @wx.send_msg(wx_data['pass_ticket'], base, cookies)
-      #   else
-      #     @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content
-      #   end
-      #   auto_reply_g = AutoReplyGlobal.where('(flag_string = ?) and wxuin = ? and flag = 0', '*', wx_data['wxuin']).first
-      #   unless auto_reply_g.blank?
-      #     if auto_reply_g.content != 'tl' # 全局非图灵机器人
-      #       base[:Msg][:Content] = auto_reply_g.content
-      #       @wx.send_msg(wx_data['pass_ticket'], base, cookies)
-      #     else
-      #       @wx.char_with_tuliung wx_data['pass_ticket'], base, cookies, from_user, content # 全局图灵机器人
-      #     end
-      #   end
-      # end
-    elsif from_user[0,2] == '@@' && from_user != wx_data['UserName'] && $redis.get("#{wx_data['wxuin']}-control") != 'stop' # 群聊
+    elsif from_user[0,2] == '@@' && $redis.get("#{wx_data['wxuin']}-control") != 'stop' # 群聊
       # TODO 判断缓存中是否存在该群组，如果不存在 获取并保存
       # TODO 群显示名称？ ‘昵称’？ ‘微信名’
-      p '经过的地方一'
       user = content.split(':')[0]
       from_display_name = ''
       group = nil
       groups = begin
         JSON.parse $redis.get("wxRot_##{wx_data['wxuin']}#groups")
       rescue
-         []
+        []
       end
       if groups.blank?
-        p '经过的地方２', 'group is blank'
         # TODO 重新获取群组
         get_group_msg wx_data, from_user, cookies
       else
-        p '经过的地方２', 'group is exist'
         groups.each do |g|
          if g['UserName'] == from_user
             group = g
             break
           end
         end
-        p 'why not here?'
-        p 'what the group is?', group
-        group = get_group_msg(wx_data, from_user, cookies) if group.blank?
-        p 'when get the group', group
-        group['MemberList'].each do |m|
-          if m['UserName'] == user
-            from_display_name = m['DisplayName']
-            if from_display_name.blank?
-              friend = get_friend_name(wx_data['wxuin'], user)
-              if friend.present?
-                from_display_name = friend['NickName']
-              else
-                 from_display_name = m['NickName']
-              end
+      end
+      group = get_group_msg(wx_data, from_user, cookies) if group.blank?
+      group['MemberList'].each do |m|
+        if m['UserName'] == user
+          from_display_name = m['DisplayName']
+          if from_display_name.blank?
+            friend = get_friend_name(wx_data['wxuin'], user)
+            if friend.present?
+              from_display_name = friend['NickName']
+            else
+              from_display_name = m['NickName']
             end
-            # from_display_name = m['NickName'] if display_name.blank?
-            break
           end
+          # from_display_name = m['NickName'] if display_name.blank?
+          break
         end
-        p '啦啦啦啦啦'
-        #查找出我
-        group['MemberList'].each do |m|
-          if m['UserName'] == wx_data['UserName']
-            display_name = m['DisplayName']
-            display_name = m['NickName'] if display_name.blank?
-            p 'what is my display_name?', display_name, content
-            if content.include?("@#{display_name}") # 包含@我的信息
-              # from who
-              # TODO 自动回复
-              p '群组自动回复'
-              auto_reply(1, base, wx_data, cookies, content, from_user, display_name = "@#{from_display_name} ")
-            end
-            break
-          end
+      end
+      #查找出我 @我 TODO 暂时关掉
+      # group['MemberList'].each do |m|
+      #   if m['UserName'] == wx_data['UserName']
+      #     display_name = m['DisplayName']
+      #     display_name = m['NickName'] if display_name.blank?
+      #     p 'what is my display_name?', display_name, content
+      #     if content.include?("@#{display_name}") # 包含@我的信息
+      #       # from who
+      #       # TODO 自动回复
+      #       p '群组自动回复'
+      #       auto_reply(1, base, wx_data, cookies, content, from_user, display_name = "@#{from_display_name} ")
+      #     end
+      #     break
+      #   end
+      # end
+      tran(wx_data, user, content, base, cookies, msg[:MsgType].to_i)
+    end
+  end
+
+  def tran(wx_data, user, content, base, cookies, msg_type)
+    settings = JSON.parse($redis.get("#{wx_data['wxuin']}_tran") || ''.to_json)
+    settings = [] if settings.blank?
+    settings.each do |s|
+      if user == s['from']
+        content = content.split(':')[1].gsub('</n>', "\n")
+        content = content.split(':')[1].gsub('<br/>', "\n")
+        if msg_type == 1
+          base[:Msg][:Content] = "#{s['from_name']}说：#{content}"
+        else
+          base[:Msg][:Content] = "#{s['from_name']}发了非文字信息，赶快去查看！"
         end
+        base[:Msg][:ToUserName] = s['to']
+        @wx.send_msg(wx_data['pass_ticket'], base, cookies)
       end
     end
   end
@@ -306,6 +294,8 @@ class WxHeartJob < ApplicationJob
     else
       groups.push(data['ContactList'][0])
       $redis.set("wxRot_##{wx[:wxuin]}#groups", groups.to_json)
+      p '重新加入了组, 新的组的长度是：'
+      p JSON.parse($redis.get("wxRot_##{wx[:wxuin]}#groups")).length
     end
     $redis.expire("wxRot_##{wx[:wxuin]}#groups", 300)
     data['ContactList'][0]

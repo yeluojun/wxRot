@@ -38,5 +38,79 @@ class Admin::WeixinsController < Admin::BasesController
         @auto_reply_g_at.push reply
       end
     end
+
+    @group = group @wxuin
   end
+
+  def groups
+    @user = params[:user_name]
+    @uin = params[:uin]
+    @members = []
+    @group = group(@uin)
+    @group.each do |g|
+      if g['UserName'] == @user
+        @group_name = g['NickName']
+        @group_id = g['UserName']
+        @members = g['MemberList']
+        break
+      end
+    end
+
+    @settings = JSON.parse($redis.get("#{@uin}_tran") || ''.to_json)
+    @settings = [] if @settings.blank?
+
+  end
+
+  def msg_tran
+    param = {
+      from: params[:from],
+      from_name: params[:from_name],
+      from_group_name: params[:from_group_name],
+      from_group_id: params[:from_group_id],
+      to: params[:to],
+      to_name: params[:to_name],
+    }
+
+    f = true
+
+    uin = params[:uin]
+
+    settings = JSON.parse($redis.get("#{uin}_tran") || ''.to_json)
+    settings = [] if settings.blank?
+    settings.each_with_index do |s, index|
+      if s['from'] == param[:from] && s['to'] == param[:to]
+        settings[index] = param
+        f = false
+      end
+    end
+    settings << param if f
+
+    $redis.set("#{uin}_tran", settings.to_json)
+    render json: {}
+  end
+
+  def tran_remove
+    param = {
+      from: params[:from],
+      to: params[:to]
+    }
+    uin = params[:uin]
+    new_s = []
+    settings = JSON.parse($redis.get("#{uin}_tran") || ''.to_json)
+    settings.each_with_index do |s, index|
+      if (s['from'] == param[:from] && s['to'] == param[:to])
+        next
+      end
+      new_s << s
+    end
+    $redis.set("#{uin}_tran", new_s.to_json)
+    render json: {}
+  end
+
+
+  private
+
+    def group(uin)
+       group = JSON.parse $redis.get("wxRot_##{uin}#groups")
+    end
 end

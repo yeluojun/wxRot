@@ -52,7 +52,7 @@
 			  <td>普通回复</td>
 			  <td>
 			    <a class="btn btn-primary" href="/admin/auto_reply_globals/<%= n.id %>/edit?wxuin=<%= @wxuin %>"+>修改</a>
-			    <a  data-id="<%= n.id %>" class="btn btn-danger delete">删除</a>
+			    <a data-id="<%= n.id %>" class="btn btn-danger delete">删除</a>
 			  </td>
 		  </tr>
 			<% end %>
@@ -93,5 +93,17 @@
 <div class="content">
 	<h5>配置定时推送(比较麻烦)</h5>
   <a CLASS="btn btn-primary">添加</a>
+</div>
+
+
+<div class="content wx-group" style="height: 400px;">
+	<h5>群组管理</h5>
+  <ul class="list-group">
+  	<% @group.each do |g| %>
+  	  <li class="list-group-item" data-id="<%= g['UserName'] %>">
+  	  	<%= link_to g['NickName'].present? ? g['NickName'] : 'no name', admin_weixins_groups_path(user_name: g['UserName'], uin: @wxuin) %>
+  	  </li>
+  	<% end %>
+  </ul>
 </div>
 
