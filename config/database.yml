@@ -15,8 +15,8 @@ default: &default
   collation: utf8mb4_bin
   pool: 5
   username: root
-  password: 12345678
-  socket: /tmp/mysql.sock
+  password: dg6954321
+  socket: /var/run/mysqld/mysqld.sock
 
 production:
   <<: *default
