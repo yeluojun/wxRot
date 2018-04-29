@@ -42,6 +42,11 @@ gem 'rack-mini-profiler', require: false
 # gem 'capistrano-rails', group: :development
 
 group :development, :test do
+  gem 'mina'
+  gem 'mina-sidekiq', require: false
+  gem 'mina-puma', require: false
+  gem 'mina-whenever', require: false
+  gem 'mina-multistage', require: false
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.13'

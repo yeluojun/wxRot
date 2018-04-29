@@ -1,6 +1,6 @@
 class WxHeartJob < ApplicationJob
   # TODO 先数据库实现,再缓存实现
-  queue_as :default
+  queue_as :wx_default
 
   # 心跳包任务
   def perform(*args)

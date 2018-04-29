@@ -1,17 +1,14 @@
-:concurrency: 5
-# 相对目录，启动时工作目录须为项目根目录
-:pidfile: tmp/pids/sidekiq.pid
-:logfile: log/sidekiq.log
-:daemon: false
-:environment: production
-
+---
+:verbose: false
+:concurrency: 2
+:timeout: 120
+:pidfile: ./tmp/pids/sidekiq.pid
+:logfile: ./log/sidekiq.log
 :queues:
-    - default
-    - [video, 2]
-    - [mailers, 2]
+  - wx_critical
+  - wx_default
 
-development:
-  :concurrency: 5
+staging:
+  :concurrency: 3
 production:
-  :concurrency: <%= ENV['SERVER_TYPE'] == 'development' ? 5 : 20 %>
-
+  :concurrency: 20

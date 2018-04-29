@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  require 'sidekiq/web'
   root 'index#index'
   post 'sessions', to: 'sessions#create'
   post 'delete', to: 'sessions#destroy'
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
+    mount Sidekiq::Web, at: '/sidekiq'
     get '/', to: 'index#index'
     get 'weixins', to: 'weixins#index'
     get 'weixins/edit', to: 'weixins#edit', as: :weixins_edit

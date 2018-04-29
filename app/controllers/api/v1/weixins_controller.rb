@@ -77,7 +77,7 @@ class Api::V1::WeixinsController < Api::V1::BasesController
 
     # WxHeartJob.perform_now({synckey: @data['SyncKey'], uin: wx[:wxuin]})  # 开启微信心跳的任务
     Thread.new do
-      WxHeartJob.perform_now({synckey: @data['SyncKey'], uin: wx[:wxuin]})  # 开启微信心跳的任务
+      WxHeartJob.perform_later({synckey: @data['SyncKey'], uin: wx[:wxuin]})  # 开启微信心跳的任务
     end
     render json: { code: 200, data: @data }
   end
