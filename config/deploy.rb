@@ -70,8 +70,6 @@ task :setup do
 end
 
 desc "Deploys the current version to the server."
-
-desc "Deploys the current version to the server."
 task :deploy do
   invoke :'git:ensure_pushed'
   deploy do
@@ -79,6 +77,9 @@ task :deploy do
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
     invoke :'rails:db_migrate'
+    comment %{npm install~~~~~~~~~~~~~~~~~~~}
+    command %[ source ~/.nvm/nvm.sh ]
+    command %[npm install]
     invoke :'rails:assets_precompile'
     invoke :'deploy:cleanup'
     on :launch do
