@@ -5,7 +5,6 @@ require 'mina_sidekiq/tasks'
 require 'mina/rvm'    # for rvm support. (https://rvm.io)
 require 'mina/puma'
 
-
 # Basic settings:
 #   domain       - The hostname to SSH to.
 #   deploy_to    - Path to deploy into.

@@ -31,6 +31,8 @@ gem 'turbolinks', '~> 5.x'
 # gem 'bcrypt', '~> 3.1.7'\
 gem 'sidekiq'
 
+gem 'therubyracer'
+
 # redis 相关
 gem 'redis', '~> 3.0'
 gem 'hiredis'
