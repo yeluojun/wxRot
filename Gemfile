@@ -40,10 +40,11 @@ gem 'rack-mini-profiler', require: false
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
+gem 'mina-sidekiq', require: false
 
 group :development, :test do
   gem 'mina'
-  gem 'mina-sidekiq', require: false
+
   gem 'mina-puma', require: false
   gem 'mina-whenever', require: false
   gem 'mina-multistage', require: false
